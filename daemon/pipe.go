@@ -5,8 +5,8 @@ maintence pipe for communicate with parent or child process (for daemon or upgra
 */
 
 import (
-	cook_log "cook/log"
 	"fmt"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
 	"os"
 	"os/exec"
 )

@@ -1,9 +1,9 @@
 package mserver
 
 import (
-	cook_daemon "cook/daemon"
-	cook_log "cook/log"
-	cook_util "cook/util"
+	cook_daemon "gitlab.niceprivate.com/golang/cook/daemon"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"net"
 	"time"
 )

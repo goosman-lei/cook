@@ -2,8 +2,8 @@ package daemon
 
 import (
 	"bytes"
-	cook_log "cook/log"
 	"fmt"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
 	"net"
 	"os"
 	"regexp"

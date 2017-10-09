@@ -8,9 +8,9 @@ references:
 */
 
 import (
-	cook_log "cook/log"
-	cook_util "cook/util"
 	"fmt"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"io/ioutil"
 	"os"
 	"os/exec"

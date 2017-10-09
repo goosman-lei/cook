@@ -2,9 +2,9 @@ package http
 
 import (
 	"bufio"
-	cook_io "cook/io"
-	cook_os "cook/os"
 	"errors"
+	cook_io "gitlab.niceprivate.com/golang/cook/io"
+	cook_os "gitlab.niceprivate.com/golang/cook/os"
 	"net"
 	"net/http"
 	"net/url"

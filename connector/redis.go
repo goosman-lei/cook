@@ -1,10 +1,10 @@
 package connector
 
 import (
-	cook_log "cook/log"
-	cook_util "cook/util"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"math/rand"
 	"time"
 )

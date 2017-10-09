@@ -1,7 +1,7 @@
 package file
 
 import (
-	cook_util "cook/util"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"os"
 	"path/filepath"
 )

@@ -2,11 +2,11 @@ package mserver
 
 import (
 	"bytes"
-	cook_io "cook/io"
-	cook_log "cook/log"
-	cook_util "cook/util"
 	"encoding/binary"
 	"fmt"
+	cook_io "gitlab.niceprivate.com/golang/cook/io"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"io"
 	"log"
 	"math/rand"

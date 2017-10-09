@@ -2,8 +2,8 @@ package stats
 
 import (
 	"bytes"
-	cook_log "cook/log"
 	"fmt"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
 	"sort"
 	"strings"
 	"sync"

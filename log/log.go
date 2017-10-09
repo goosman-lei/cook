@@ -1,8 +1,8 @@
 package log
 
 import (
-	cook_util "cook/util"
 	"fmt"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"log"
 	"os"
 	"syscall"

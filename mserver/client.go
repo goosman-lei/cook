@@ -1,10 +1,10 @@
 package mserver
 
 import (
-	cook_log "cook/log"
-	cook_util "cook/util"
 	"crypto/md5"
 	"fmt"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"net"
 	"sync"
 	"time"

@@ -1,7 +1,7 @@
 package pool
 
 import (
-	cook_util "cook/util"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"net"
 	"sync"
 	"testing"

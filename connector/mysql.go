@@ -1,11 +1,11 @@
 package connector
 
 import (
-	cook_log "cook/log"
-	cook_util "cook/util"
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 )
 
 type MysqlConnWrapper struct {
