@@ -8,7 +8,6 @@ references:
 */
 
 import (
-	"fmt"
 	cook_log "gitlab.niceprivate.com/golang/cook/log"
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"io/ioutil"
@@ -88,7 +87,7 @@ func Upgrade() error {
 	cook_log.Infof("upgrade command: %s %s . env_living_upgrade: %s", cook_util.ExecFile(), strings.Join(os.Args[1:], " "), e_string)
 	upgrade_child_cmd = &exec.Cmd{
 		Path:       cook_util.ExecFile(),
-		Args:       os.Args[1:],
+		Args:       os.Args,
 		Env:        os.Environ(),
 		ExtraFiles: e_files,
 	}
@@ -111,7 +110,6 @@ func do_parent() error {
 	var (
 		e_files  []*os.File
 		e_string string
-		dev_null *os.File
 		err      error
 		cmd      exec.Cmd
 	)
@@ -134,19 +132,12 @@ func do_parent() error {
 	os.Setenv(ENV_NAME_DAEMON_STAGE, STAGE_DAEMON)
 	os.Setenv(ENV_NAME_LIVING_UPGRADE, e_string)
 
-	if dev_null, err = os.OpenFile(os.DevNull, os.O_RDWR, 0755); err != nil {
-		return fmt.Errorf("open /dev/null failed: %s", err)
-	}
-
 	cook_log.Infof("daemon command: %s %s . env_living_upgrade: %s", cook_util.ExecFile(), strings.Join(os.Args[1:], " "), e_string)
 	cmd = exec.Cmd{
 		Path:       cook_util.ExecFile(),
-		Args:       os.Args[1:],
+		Args:       os.Args,
 		Env:        os.Environ(),
 		Dir:        "/",
-		Stdin:      dev_null,
-		Stdout:     dev_null,
-		Stderr:     dev_null,
 		ExtraFiles: e_files,
 		SysProcAttr: &syscall.SysProcAttr{
 			Setsid: true,
