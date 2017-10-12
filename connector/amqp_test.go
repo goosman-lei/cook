@@ -2,27 +2,28 @@ package connector
 
 import (
 	"github.com/streadway/amqp"
+	cook_pool "gitlab.niceprivate.com/golang/cook/pool"
 	"testing"
 )
 
 func TestCase(t *testing.T) {
 	var (
-		err  error
-		conn *AMQPWrapper
-		ch   <-chan amqp.Delivery
+		err error
+		mq  *cook_pool.Pool_amqp_channel_obj
+		ch  <-chan amqp.Delivery
 	)
 
 	SetupAmqp(map[string]AMQPConf{
-		"default": AMQPConf{Username: "nice", Password: "zp50MpILYUono", Addr: "rabbitmq.niceprivate.com:5672", Vhost: "/"},
+		"default": AMQPConf{Username: "nice", Password: "zp50MpILYUono", Addr: "rabbitmq.niceprivate.com:5672", Vhost: "/", MaxConn: 1, MaxChannel: 1},
 	})
-	conn = MustGetAmqp("default")
-	conn.Produce("show-pub-1", "guoguo.amqp.exchange", "RK_1")
-	conn.Produce("show-pub-2", "guoguo.amqp.exchange", "RK_1")
-	conn.Produce("show-pub-3", "guoguo.amqp.exchange", "RK_1")
-	conn.Produce("show-pub-4", "guoguo.amqp.exchange", "RK_1")
-	conn.Produce("show-pub-5", "guoguo.amqp.exchange", "RK_1")
+	mq, err = Get_amqp_obj("default")
+	mq.Produce_normal("show-pub-1", "guoguo.amqp.exchange.fanout", "RK_1")
+	mq.Produce_normal("show-pub-2", "guoguo.amqp.exchange.fanout", "RK_1")
+	mq.Produce_normal("show-pub-3", "guoguo.amqp.exchange.fanout", "RK_1")
+	mq.Produce_normal("show-pub-4", "guoguo.amqp.exchange.fanout", "RK_1")
+	mq.Produce_normal("show-pub-5", "guoguo.amqp.exchange.fanout", "RK_1")
 
-	if ch, err = conn.Consume("guoguo.amqp.queue"); err != nil {
+	if ch, err = mq.Consume_normal("guoguo.amqp.queue"); err != nil {
 		t.Logf("consume failed: %s", err)
 	}
 

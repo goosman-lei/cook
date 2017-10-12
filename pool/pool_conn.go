@@ -1,7 +1,6 @@
 package pool
 
 import (
-	"errors"
 	"net"
 	"time"
 )
@@ -14,10 +13,6 @@ type Pool_conn_obj struct {
 	net.Conn
 	pc *Pool_conn
 }
-
-var (
-	ErrNotConnection = errors.New("is not pool-wrapper-connection")
-)
 
 func NewPool_conn(c int, factory func() (net.Conn, error)) *Pool_conn {
 	pc := &Pool_conn{}
@@ -43,7 +38,7 @@ func (pc *Pool_conn) Get() (*Pool_conn_obj, error) {
 	if c, err := pc.get(); err != nil {
 		return nil, err
 	} else if v, ok := c.(*Pool_conn_obj); !ok {
-		return nil, ErrNotConnection
+		return nil, ErrNotWrapper
 	} else {
 		return v, nil
 	}
@@ -53,7 +48,7 @@ func (pc *Pool_conn) Get_timeout(duration time.Duration) (*Pool_conn_obj, error)
 	if c, err := pc.get_timeout(duration); err != nil {
 		return nil, err
 	} else if v, ok := c.(*Pool_conn_obj); !ok {
-		return nil, ErrNotConnection
+		return nil, ErrNotWrapper
 	} else {
 		return v, nil
 	}

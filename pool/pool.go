@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	ErrClosed  = errors.New("pool already closed")
-	ErrTimeout = errors.New("pool get timeout")
+	ErrClosed     = errors.New("pool already closed")
+	ErrTimeout    = errors.New("pool get timeout")
+	ErrNotWrapper = errors.New("is not wrapper for pool object")
 )
 
 type Pool struct {
@@ -76,13 +77,22 @@ Product_obj:
 	}
 
 Wait_obj:
-	select {
-	case obj = <-p.objs:
-		if obj == nil {
-			return nil, ErrClosed
+	if deadline.IsZero() {
+		select {
+		case obj = <-p.objs:
+			if obj == nil {
+				return nil, ErrClosed
+			}
 		}
-	case <-time.After(deadline.Sub(time.Now())):
-		return nil, ErrTimeout
+	} else {
+		select {
+		case obj = <-p.objs:
+			if obj == nil {
+				return nil, ErrClosed
+			}
+		case <-time.After(deadline.Sub(time.Now())):
+			return nil, ErrTimeout
+		}
 	}
 	return obj, nil
 }
