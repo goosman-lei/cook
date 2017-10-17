@@ -176,7 +176,7 @@ func Test_parse_insert(t *testing.T) {
 	if query, args, err = q.Parse(); err != nil {
 		t.Logf("parse error: %s", err)
 		t.Fail()
-	} else if query != "INSERT INTO kk_user SET name = ?, add_time = unix_timestamp(now()), avatar_url = ?, age = ? ON DUPLICATE KEY UPDATE last_update_time = unix_timestamp(now()), avatar_url = ?, age = ?" {
+	} else if query != "INSERT INTO kk_user SET name = ?, add_time = (unix_timestamp(now())), avatar_url = ?, age = ? ON DUPLICATE KEY UPDATE last_update_time = (unix_timestamp(now())), avatar_url = ?, age = ?" {
 		t.Logf("wrong sql: %s", query)
 		t.Fail()
 	} else {

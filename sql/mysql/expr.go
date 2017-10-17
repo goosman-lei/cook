@@ -117,60 +117,72 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 	switch e.op {
 	case OP_EQ:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" = ")
+			*off += copy((*buf)[*off:], e.field+" = (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" = ?")
 		}
 	case OP_NE:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" != ")
+			*off += copy((*buf)[*off:], e.field+" != (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" != ?")
 		}
 	case OP_GE:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" >= ")
+			*off += copy((*buf)[*off:], e.field+" >= (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" >= ?")
 		}
 	case OP_GT:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" > ")
+			*off += copy((*buf)[*off:], e.field+" > (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" > ?")
 		}
 	case OP_LE:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" <= ")
+			*off += copy((*buf)[*off:], e.field+" <= (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" <= ?")
 		}
 	case OP_LT:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" < ")
+			*off += copy((*buf)[*off:], e.field+" < (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" < ?")
@@ -181,7 +193,8 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
-			*off += copy((*buf)[*off:], e.field+")")
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" BETWEEN ?")
@@ -191,7 +204,8 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
-			*off += copy((*buf)[*off:], e.field+")")
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand2)
 			*off += copy((*buf)[*off:], " AND ?")
@@ -202,20 +216,24 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 		*off += copy((*buf)[*off:], e.field+" IS NOT NULL")
 	case OP_LIKE:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" LIKE ")
+			*off += copy((*buf)[*off:], e.field+" LIKE (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" LIKE ?")
 		}
 	case OP_NOT_LIKE:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" NOT LIKE ")
+			*off += copy((*buf)[*off:], e.field+" NOT LIKE (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" NOT LIKE ?")
@@ -234,13 +252,15 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 				*off += copy((*buf)[*off:], e.field+" IN(")
 				for i, is_first := 0, true; i < op_len; i++ {
 					if is_first {
-						*off += copy((*buf)[*off:], "?")
+						(*buf)[*off] = '?'
+						*off++
 						is_first = false
 					} else {
 						*off += copy((*buf)[*off:], ", ?")
 					}
 				}
-				*off += copy((*buf)[*off:], ")")
+				(*buf)[*off] = ')'
+				*off++
 			}
 		case reflect.Array:
 			if op_len := r_oprand1.Len(); op_len <= 0 {
@@ -253,13 +273,15 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 				*off += copy((*buf)[*off:], e.field+" IN(")
 				for i, is_first := 0, true; i < op_len; i++ {
 					if is_first {
-						*off += copy((*buf)[*off:], "?")
+						(*buf)[*off] = '?'
+						*off++
 						is_first = false
 					} else {
 						*off += copy((*buf)[*off:], ", ?")
 					}
 				}
-				*off += copy((*buf)[*off:], ")")
+				(*buf)[*off] = ')'
+				*off++
 			}
 		default:
 			return fmt.Errorf("<specify non-slice/non-array value to {%s in(?)}>", e.field)
@@ -278,13 +300,15 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 				*off += copy((*buf)[*off:], e.field+" IN(")
 				for i, is_first := 0, true; i < op_len; i++ {
 					if is_first {
-						*off += copy((*buf)[*off:], "?")
+						(*buf)[*off] = '?'
+						*off++
 						is_first = false
 					} else {
 						*off += copy((*buf)[*off:], ", ?")
 					}
 				}
-				*off += copy((*buf)[*off:], ")")
+				(*buf)[*off] = ')'
+				*off++
 			}
 		case reflect.Array:
 			if op_len := r_oprand1.Len(); op_len <= 0 {
@@ -297,13 +321,15 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 				*off += copy((*buf)[*off:], e.field+" IN(")
 				for i, is_first := 0, true; i < op_len; i++ {
 					if is_first {
-						*off += copy((*buf)[*off:], "?")
+						(*buf)[*off] = '?'
+						*off++
 						is_first = false
 					} else {
 						*off += copy((*buf)[*off:], ", ?")
 					}
 				}
-				*off += copy((*buf)[*off:], ")")
+				(*buf)[*off] = ')'
+				*off++
 			}
 		default:
 			return fmt.Errorf("<specify non-slice/non-array value to {%s not in(?)}>", e.field)
@@ -312,31 +338,37 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 		if v, ok := e.oprand1.([]*Expr); !ok {
 			return fmt.Errorf("<specify non-[]*Expr value to COMMA expr>")
 		} else {
-			*off += copy((*buf)[*off:], "(")
+			(*buf)[*off] = '('
+			*off++
 			if err := multi_expr_to_string(v, ", ", args, buf, off); err != nil {
 				return err
 			}
-			*off += copy((*buf)[*off:], ")")
+			(*buf)[*off] = ')'
+			*off++
 		}
 	case OP_AND:
 		if v, ok := e.oprand1.([]*Expr); !ok {
 			return fmt.Errorf("<specify non-[]*Expr value to AND expr>")
 		} else {
-			*off += copy((*buf)[*off:], "(")
+			(*buf)[*off] = '('
+			*off++
 			if err := multi_expr_to_string(v, " AND ", args, buf, off); err != nil {
 				return err
 			}
-			*off += copy((*buf)[*off:], ")")
+			(*buf)[*off] = ')'
+			*off++
 		}
 	case OP_OR:
 		if v, ok := e.oprand1.([]*Expr); !ok {
 			return fmt.Errorf("<specify non-[]*Expr value to OR expr>")
 		} else {
-			*off += copy((*buf)[*off:], "(")
+			(*buf)[*off] = '('
+			*off++
 			if err := multi_expr_to_string(v, " OR ", args, buf, off); err != nil {
 				return err
 			}
-			*off += copy((*buf)[*off:], ")")
+			(*buf)[*off] = ')'
+			*off++
 		}
 	case OP_NOT:
 		if v, ok := e.oprand1.(*Expr); !ok {
@@ -346,14 +378,17 @@ func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
-			*off += copy((*buf)[*off:], ")")
+			(*buf)[*off] = ')'
+			*off++
 		}
 	case OP_ASSIGN:
 		if v, ok := e.oprand1.(*Expr); ok {
-			*off += copy((*buf)[*off:], e.field+" = ")
+			*off += copy((*buf)[*off:], e.field+" = (")
 			if err := expr_to_string(v, args, buf, off); err != nil {
 				return err
 			}
+			(*buf)[*off] = ')'
+			*off++
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" = ?")

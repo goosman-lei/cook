@@ -6,11 +6,14 @@ import (
 
 func Test_parse_expr_eq(t *testing.T) {
 	if query, args, err := parse_expr(
-		E_eq("age", 1),
+		E_and(
+			E_eq("age", 1),
+			E_eq("age", E_field("birthday")),
+		),
 	); err != nil {
 		t.Logf("parse error: %s", err)
 		t.Fail()
-	} else if query != "age = ?" {
+	} else if query != "(age = ? AND age = (birthday))" {
 		t.Logf("wrong query: %s", query)
 		t.Fail()
 	} else {
@@ -367,7 +370,7 @@ func Test_parse_expr_assign_expr(t *testing.T) {
 	); err != nil {
 		t.Logf("parse error: %s", err)
 		t.Fail()
-	} else if query != "name = concat(name, ?, ?, ?)" {
+	} else if query != "name = (concat(name, ?, ?, ?))" {
 		t.Logf("wrong query: %s", query)
 		t.Fail()
 	} else {
