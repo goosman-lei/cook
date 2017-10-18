@@ -9,6 +9,15 @@ import (
 
 var skipMysql bool = false
 
+type FieldDesc struct {
+	Field   string
+	Type    string
+	Null    string
+	Key     string
+	Default string
+	Extra   string
+}
+
 func init() {
 	testAddr := "bdb.slave.kkgoo.niceprivate.com:3306"
 	if _, err := net.DialTimeout("tcp", testAddr, 100*time.Millisecond); err != nil {
@@ -23,8 +32,8 @@ func init() {
 			Password: "Cb84eZaa229ddnm",
 			Database: "kkgoo",
 
-			MaxIdle: 16,
-			MaxOpen: 16,
+			MaxIdle: 4,
+			MaxOpen: 4,
 		},
 		"cluster2": MysqlConf{
 			Addr:     "bdb.slave.kkgoo.niceprivate.com:3306",
@@ -32,162 +41,39 @@ func init() {
 			Password: "Cb84eZaa229ddnm",
 			Database: "kkgoo",
 
-			MaxIdle: 16,
-			MaxOpen: 16,
+			MaxIdle: 4,
+			MaxOpen: 4,
 		},
 	}
 
 	SetupMysql(configs)
-
 }
 
-func TestQuery(t *testing.T) {
+func Test_pool(t *testing.T) {
 	if skipMysql {
-		t.Skipf("test mysql server is not reachable")
+		return
 	}
 	var (
-		id          int
-		name        string
-		conn1       = MustGetMysql("cluster1")
-		queryMUinfo = "SELECT id, name FROM kk_user WHERE name IN(?, ?, ?, ?)"
+		db     *sql.DB
+		rows   *sql.Rows
+		fields []*FieldDesc
 	)
+	db, _ = GetMysql("cluster1")
+	rows, _ = db.Query("DESC kk_user")
 
-	rows, err := conn1.Query(queryMUinfo, "bluef", "狮你妹", "大鹏", "ALEX")
-	if err != nil {
-		t.Logf("Query[%s] failed: %s", queryMUinfo, err)
-		t.Fail()
-	}
 	for rows.Next() {
-		rows.Scan(&id, &name)
-		switch id {
-		case 116074:
-			if name != "bluef" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		case 93:
-			if name != "大鹏" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		case 94:
-			if name != "ALEX" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		case 100:
-			if name != "狮你妹" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		default:
-			t.Logf("unexptected data: uid = %d uname = %s", id, name)
-			t.Fail()
-		}
-	}
-	rows.Close()
-}
-
-func TestGetRow(t *testing.T) {
-	if skipMysql {
-		t.Skipf("test mysql server is not reachable")
+		field_desc := new(FieldDesc)
+		rows.Scan(&field_desc.Field, &field_desc.Type, &field_desc.Null, &field_desc.Key, &field_desc.Default, &field_desc.Extra)
+		fields = append(fields, field_desc)
 	}
 
-	row, err := MustGetMysql("cluster1").GetRow_Simple("kk_user", []string{"id", "name"}, []MExpr{
-		ME_Eq("id", 0xFFFFFFFF),
-	})
-	if err != nil {
-		t.Logf("GetRow failed: %s", err)
-		t.Fail()
+	t.Logf("+------------------+--------------------------------+------+-----+---------+----------------+")
+	t.Logf("| Field            | Type                           | Null | Key | Default | Extra          |")
+	t.Logf("+------------------+--------------------------------+------+-----+---------+----------------+")
+	for _, field := range fields {
+		t.Logf("| %-16s | %-30s | %-4s | %-3s | %-7s | %-14s |\n", field.Field, field.Type, field.Null, field.Key, field.Default, field.Extra)
 	}
-	var (
-		id   int
-		name string
-	)
-	if err = row.Scan(&id, &name); err != sql.ErrNoRows {
-		t.Logf("want error: %s, actual: %s", sql.ErrNoRows, err)
-		t.Fail()
-	}
-}
+	t.Logf("+------------------+--------------------------------+------+-----+---------+----------------+")
 
-func TestGetRows(t *testing.T) {
-	if skipMysql {
-		t.Skipf("test mysql server is not reachable")
-	}
-	var (
-		id    int
-		name  string
-		conn1 = MustGetMysql("cluster1")
-		rows  *sql.Rows
-		err   error
-	)
-	rows, err = conn1.GetRows_Simple("kk_user", []string{"id", "name"}, []MExpr{
-		ME_Or([]MExpr{
-			ME_In("name", []interface{}{"大鹏", "狮你妹", "ALEX", "bluef"}),
-			ME_Eq("id", 5012470),
-		}),
-	})
-	if err != nil {
-		t.Logf("Query failed: %s", err)
-		t.Fail()
-	}
-	for rows.Next() {
-		rows.Scan(&id, &name)
-		switch id {
-		case 116074:
-			if name != "bluef" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		case 93:
-			if name != "大鹏" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		case 94:
-			if name != "ALEX" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		case 100:
-			if name != "狮你妹" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		case 5012470:
-			if name != "今晚打虫子" {
-				t.Logf("unexptected data: uid = %d uname = %s", id, name)
-				t.Fail()
-			}
-		default:
-			t.Logf("unexptected data: uid = %d uname = %s", id, name)
-			t.Fail()
-		}
-	}
-
-}
-
-func TestCount(t *testing.T) {
-	if skipMysql {
-		t.Skipf("test mysql server is not reachable")
-	}
-	var (
-		conn1 = MustGetMysql("cluster1")
-		count int
-		err   error
-	)
-	count, err = conn1.Count(MT_Slice_Name("kk_user"), []MExpr{
-		ME_Or([]MExpr{
-			ME_In("id", []interface{}{93, 94, 100}),
-			ME_Eq("id", 5012470),
-		}),
-	}, "id")
-	if err != nil {
-		t.Logf("Query failed: %s", err)
-		t.Fail()
-	}
-	if count != 4 {
-		t.Logf("Count failed: wanted = %d, actually = %d", 4, count)
-		t.Fail()
-	}
+	//t.Fail()
 }
