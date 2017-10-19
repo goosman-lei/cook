@@ -25,9 +25,9 @@ type join_table struct {
 	join_type uint8
 }
 
-type sql_args []interface{}
+type SqlArgs []interface{}
 
-func (s *sql_args) append(d ...interface{}) {
+func (s *SqlArgs) append(d ...interface{}) {
 	*s = append(*s, d...)
 }
 
@@ -58,7 +58,6 @@ const (
 	OP_FIELD
 	// from clause
 	OP_TABLE
-	OP_JOIN
 )
 
 const (
@@ -80,11 +79,11 @@ const (
 	FLAGS_ORDERBY_DESC   = 0x2
 )
 
-func parse_expr(expr *Expr) (string, sql_args, error) {
+func parse_expr(expr *Expr) (string, SqlArgs, error) {
 	var (
 		err   error
-		args  sql_args  = []interface{}{}
-		pargs *sql_args = &args
+		args  SqlArgs  = []interface{}{}
+		pargs *SqlArgs = &args
 
 		buf []byte = make([]byte, Max_sql_len)
 		off int    = 0
@@ -97,7 +96,7 @@ func parse_expr(expr *Expr) (string, sql_args, error) {
 	}
 }
 
-func multi_expr_to_string(exprs []*Expr, linker string, args *sql_args, buf *[]byte, off *int) error {
+func multi_expr_to_string(exprs []*Expr, linker string, args *SqlArgs, buf *[]byte, off *int) error {
 	is_first := true
 	for _, expr := range exprs {
 		if is_first {
@@ -113,7 +112,7 @@ func multi_expr_to_string(exprs []*Expr, linker string, args *sql_args, buf *[]b
 	}
 	return nil
 }
-func expr_to_string(e *Expr, args *sql_args, buf *[]byte, off *int) error {
+func expr_to_string(e *Expr, args *SqlArgs, buf *[]byte, off *int) error {
 	switch e.op {
 	case OP_EQ:
 		if v, ok := e.oprand1.(*Expr); ok {

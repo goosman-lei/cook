@@ -5,15 +5,15 @@ import (
 )
 
 var (
-	empty_sql_args sql_args = make(sql_args, 0)
+	empty_sql_args SqlArgs = make(SqlArgs, 0)
 
 	ErrParseEmpty = errors.New("parsed empty clause")
 )
 
-func (s *Statement) parse_select() (string, sql_args, error) {
+func (s *Statement) parse_select() (string, SqlArgs, error) {
 	var (
 		err  error
-		args sql_args = make(sql_args, 0)
+		args SqlArgs = make(SqlArgs, 0)
 
 		buf []byte = make([]byte, Max_sql_len)
 		off int    = 0
@@ -69,10 +69,10 @@ func (s *Statement) parse_select() (string, sql_args, error) {
 	return string(buf[:off]), args, nil
 }
 
-func (s *Statement) parse_update() (string, sql_args, error) {
+func (s *Statement) parse_update() (string, SqlArgs, error) {
 	var (
 		err  error
-		args sql_args = make(sql_args, 0)
+		args SqlArgs = make(SqlArgs, 0)
 
 		buf []byte = make([]byte, 16*1024)
 		off int    = 0
@@ -114,10 +114,10 @@ func (s *Statement) parse_update() (string, sql_args, error) {
 	return string(buf[:off]), args, nil
 }
 
-func (s *Statement) parse_insert() (string, sql_args, error) {
+func (s *Statement) parse_insert() (string, SqlArgs, error) {
 	var (
 		err  error
-		args sql_args = make(sql_args, 0)
+		args SqlArgs = make(SqlArgs, 0)
 
 		buf []byte = make([]byte, 16*1024)
 		off int    = 0
@@ -145,10 +145,10 @@ func (s *Statement) parse_insert() (string, sql_args, error) {
 	return string(buf[:off]), args, nil
 }
 
-func (s *Statement) parse_delete() (string, sql_args, error) {
+func (s *Statement) parse_delete() (string, SqlArgs, error) {
 	var (
 		err  error
-		args sql_args = make(sql_args, 0)
+		args SqlArgs = make(SqlArgs, 0)
 
 		buf []byte = make([]byte, 16*1024)
 		off int    = 0

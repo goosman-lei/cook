@@ -8,7 +8,7 @@ func Test_parse_select_1(t *testing.T) {
 	var (
 		q     *Statement
 		query string
-		args  sql_args
+		args  SqlArgs
 		err   error
 	)
 
@@ -52,7 +52,7 @@ func Test_parse_select_2(t *testing.T) {
 	var (
 		q     *Statement
 		query string
-		args  sql_args
+		args  SqlArgs
 		err   error
 	)
 
@@ -93,7 +93,7 @@ func Test_parse_update(t *testing.T) {
 	var (
 		q     *Statement
 		query string
-		args  sql_args
+		args  SqlArgs
 		err   error
 	)
 
@@ -127,7 +127,7 @@ func Test_parse_delete(t *testing.T) {
 	var (
 		q     *Statement
 		query string
-		args  sql_args
+		args  SqlArgs
 		err   error
 	)
 
@@ -158,7 +158,7 @@ func Test_parse_insert(t *testing.T) {
 	var (
 		q     *Statement
 		query string
-		args  sql_args
+		args  SqlArgs
 		err   error
 	)
 

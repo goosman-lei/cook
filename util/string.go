@@ -24,3 +24,18 @@ func Rand_str(len int) string {
 
 	return buf.String()
 }
+
+func Hump_to_underline(s string) string {
+	b := new(bytes.Buffer)
+	for i, c := range s {
+		if c >= 64 && c <= 90 {
+			if i != 0 {
+				b.WriteRune('_')
+			}
+			b.WriteRune(c + 32)
+		} else {
+			b.WriteRune(c)
+		}
+	}
+	return b.String()
+}

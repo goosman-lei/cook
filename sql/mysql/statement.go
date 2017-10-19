@@ -35,7 +35,7 @@ const (
 	STATEMENT_TYPE_INSERT
 )
 
-func (s *Statement) Parse() (string, sql_args, error) {
+func (s *Statement) Parse() (string, SqlArgs, error) {
 	switch s.Type {
 	case STATEMENT_TYPE_SELECT:
 		return s.parse_select()
