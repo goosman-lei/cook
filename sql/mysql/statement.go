@@ -12,12 +12,14 @@ var (
 type Statement struct {
 	Type uint8
 
-	SelectExprs []*Expr
-	UpdateExprs []*Expr
-	InsertExprs []*Expr
-	DeleteExprs []*Expr
+	SelectExprs     []*Expr
+	UpdateExprs     []*Expr
+	InsertIntoExprs []*Expr
+	DeleteExprs     []*Expr
 
 	SetExprs     []*Expr
+	ColsList     []string
+	ValuesExprs  [][]*Expr
 	FromExprs    []*Expr
 	WhereExprs   []*Expr
 	GroupbyExprs []*Expr
@@ -58,8 +60,8 @@ func Update(exprs ...*Expr) *Statement {
 	return (&Statement{}).Update(exprs...)
 }
 
-func Insert(exprs ...*Expr) *Statement {
-	return (&Statement{}).Insert(exprs...)
+func InsertInto(exprs ...*Expr) *Statement {
+	return (&Statement{}).InsertInto(exprs...)
 }
 
 func Delete(exprs ...*Expr) *Statement {
@@ -68,6 +70,14 @@ func Delete(exprs ...*Expr) *Statement {
 
 func Set(exprs ...*Expr) *Statement {
 	return (&Statement{}).Set(exprs...)
+}
+
+func Cols(cols ...string) *Statement {
+	return (&Statement{}).Cols(cols...)
+}
+
+func Values(exprs ...[]*Expr) *Statement {
+	return (&Statement{}).Values(exprs...)
 }
 
 func From(exprs ...*Expr) *Statement {
@@ -110,9 +120,9 @@ func (s *Statement) Update(exprs ...*Expr) *Statement {
 	return s
 }
 
-func (s *Statement) Insert(exprs ...*Expr) *Statement {
+func (s *Statement) InsertInto(exprs ...*Expr) *Statement {
 	s.Type = STATEMENT_TYPE_INSERT
-	s.InsertExprs = append(s.InsertExprs, exprs...)
+	s.InsertIntoExprs = append(s.InsertIntoExprs, exprs...)
 	return s
 }
 
@@ -124,6 +134,21 @@ func (s *Statement) Delete(exprs ...*Expr) *Statement {
 
 func (s *Statement) Set(exprs ...*Expr) *Statement {
 	s.SetExprs = append(s.SetExprs, exprs...)
+	return s
+}
+
+func (s *Statement) Cols(cols ...string) *Statement {
+	s.ColsList = append(s.ColsList, cols...)
+	return s
+}
+
+func (s *Statement) Values(exprs ...[]*Expr) *Statement {
+	s.ValuesExprs = append(s.ValuesExprs, exprs...)
+	return s
+}
+
+func (s *Statement) Values_append(exprs ...*Expr) *Statement {
+	s.ValuesExprs = append(s.ValuesExprs, exprs)
 	return s
 }
 

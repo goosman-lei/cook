@@ -124,21 +124,53 @@ func (s *Statement) parse_insert() (string, SqlArgs, error) {
 	)
 
 	off += copy(buf[off:], "INSERT INTO ")
-	if err = multi_expr_to_string(s.InsertExprs, ", ", &args, &buf, &off); err != nil {
+	if err = multi_expr_to_string(s.InsertIntoExprs, ", ", &args, &buf, &off); err != nil {
 		return "", empty_sql_args, err
 	}
 
-	if s.SetExprs != nil {
+	if s.ValuesExprs != nil {
+		if len(s.ColsList) > 0 {
+			(buf)[off] = '('
+			off++
+			is_first := true
+			for _, col := range s.ColsList {
+				if is_first {
+					is_first = false
+					off += copy(buf[off:], col)
+				} else {
+					off += copy(buf[off:], ", "+col)
+				}
+			}
+			(buf)[off] = ')'
+			off++
+		}
+
+		off += copy(buf[off:], " VALUES ")
+		is_first := true
+		for _, exprs := range s.ValuesExprs {
+			if is_first {
+				is_first = false
+			} else {
+				(buf)[off] = ','
+				off++
+				(buf)[off] = ' '
+				off++
+			}
+			if err = multi_expr_to_string(exprs, ", ", &args, &buf, &off); err != nil {
+				return "", empty_sql_args, err
+			}
+		}
+	} else if s.SetExprs != nil {
 		off += copy(buf[off:], " SET ")
 		if err = multi_expr_to_string(s.SetExprs, ", ", &args, &buf, &off); err != nil {
 			return "", empty_sql_args, err
 		}
-	}
 
-	if s.OndupExprs != nil {
-		off += copy(buf[off:], " ON DUPLICATE KEY UPDATE ")
-		if err = multi_expr_to_string(s.OndupExprs, ", ", &args, &buf, &off); err != nil {
-			return "", empty_sql_args, err
+		if s.OndupExprs != nil {
+			off += copy(buf[off:], " ON DUPLICATE KEY UPDATE ")
+			if err = multi_expr_to_string(s.OndupExprs, ", ", &args, &buf, &off); err != nil {
+				return "", empty_sql_args, err
+			}
 		}
 	}
 

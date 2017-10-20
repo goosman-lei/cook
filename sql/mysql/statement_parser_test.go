@@ -154,7 +154,7 @@ func Test_parse_delete(t *testing.T) {
 	}
 }
 
-func Test_parse_insert(t *testing.T) {
+func Test_parse_insert_set(t *testing.T) {
 	var (
 		q     *Statement
 		query string
@@ -162,7 +162,7 @@ func Test_parse_insert(t *testing.T) {
 		err   error
 	)
 
-	q = Insert(E_table("kk_user")).Set(
+	q = InsertInto(E_table("kk_user")).Set(
 		E_assign("name", "goosman-lei"),
 		E_assign("add_time", E_literal("unix_timestamp(now())")),
 		E_assign("avatar_url", "http://cdn.host.com/name/avatar.png"),
@@ -181,6 +181,37 @@ func Test_parse_insert(t *testing.T) {
 		t.Fail()
 	} else {
 		expect_args := []interface{}{"goosman-lei", "http://cdn.host.com/name/avatar.png", 30, "http://cdn.host.com/name/avatar.png", 30}
+		for i, v := range expect_args {
+			if v != args[i] {
+				t.Logf("wrong args at index[%d]. want: %#v, real: %#v", i, v, args[i])
+				t.Fail()
+			}
+		}
+	}
+}
+
+func Test_parse_insert_values(t *testing.T) {
+	var (
+		q     *Statement
+		query string
+		args  SqlArgs
+		err   error
+	)
+
+	q = InsertInto(E_table("kk_user")).Cols("name", "add_time", "avatar_url", "age").Values_append(
+		E_values("goosman-lei", E_literal("unix_timestamp(now())"), "http://cdn.host.com/name/avatar.png", 30),
+	).Values_append(
+		E_values("goosman", E_literal("unix_timestamp(now())"), "http://cdn.host.com/name/avatar-2.png", 32),
+	)
+
+	if query, args, err = q.Parse(); err != nil {
+		t.Logf("parse error: %s", err)
+		t.Fail()
+	} else if query != "INSERT INTO kk_user(name, add_time, avatar_url, age) VALUES (?, (unix_timestamp(now())), ?, ?), (?, (unix_timestamp(now())), ?, ?)" {
+		t.Logf("wrong sql: %s", query)
+		t.Fail()
+	} else {
+		expect_args := []interface{}{"goosman-lei", "http://cdn.host.com/name/avatar.png", 30, "goosman", "http://cdn.host.com/name/avatar-2.png", 32}
 		for i, v := range expect_args {
 			if v != args[i] {
 				t.Logf("wrong args at index[%d]. want: %#v, real: %#v", i, v, args[i])

@@ -53,6 +53,7 @@ const (
 	OP_NOT
 	// set expr
 	OP_ASSIGN
+	OP_VALUES
 	// literal
 	OP_LITERAL
 	OP_FIELD
@@ -240,44 +241,24 @@ func expr_to_string(e *Expr, args *SqlArgs, buf *[]byte, off *int) error {
 	case OP_IN:
 		r_oprand1 := reflect.ValueOf(e.oprand1)
 		switch r_oprand1.Kind() {
-		case reflect.Slice:
+		case reflect.Slice, reflect.Array:
 			if op_len := r_oprand1.Len(); op_len <= 0 {
 				return err_skip_expr
 			} else {
 				r_args := reflect.ValueOf(args).Elem()
-				for i := 0; i < op_len; i++ {
-					r_args.Set(reflect.Append(r_args, r_oprand1.Index(i)))
-				}
 				*off += copy((*buf)[*off:], e.field+" IN(")
 				for i, is_first := 0, true; i < op_len; i++ {
-					if is_first {
-						(*buf)[*off] = '?'
-						*off++
-						is_first = false
-					} else {
-						*off += copy((*buf)[*off:], ", ?")
-					}
-				}
-				(*buf)[*off] = ')'
-				*off++
-			}
-		case reflect.Array:
-			if op_len := r_oprand1.Len(); op_len <= 0 {
-				return err_skip_expr
-			} else {
-				r_args := reflect.ValueOf(args).Elem()
-				for i := 0; i < op_len; i++ {
 					r_args.Set(reflect.Append(r_args, r_oprand1.Index(i)))
-				}
-				*off += copy((*buf)[*off:], e.field+" IN(")
-				for i, is_first := 0, true; i < op_len; i++ {
 					if is_first {
-						(*buf)[*off] = '?'
-						*off++
 						is_first = false
 					} else {
-						*off += copy((*buf)[*off:], ", ?")
+						(*buf)[*off] = ','
+						*off++
+						(*buf)[*off] = ' '
+						*off++
 					}
+					(*buf)[*off] = '?'
+					*off++
 				}
 				(*buf)[*off] = ')'
 				*off++
@@ -288,44 +269,24 @@ func expr_to_string(e *Expr, args *SqlArgs, buf *[]byte, off *int) error {
 	case OP_NOT_IN:
 		r_oprand1 := reflect.ValueOf(e.oprand1)
 		switch r_oprand1.Kind() {
-		case reflect.Slice:
+		case reflect.Slice, reflect.Array:
 			if op_len := r_oprand1.Len(); op_len <= 0 {
 				return err_skip_expr
 			} else {
 				r_args := reflect.ValueOf(args).Elem()
-				for i := 0; i < op_len; i++ {
-					r_args.Set(reflect.Append(r_args, r_oprand1.Index(i)))
-				}
-				*off += copy((*buf)[*off:], e.field+" IN(")
+				*off += copy((*buf)[*off:], e.field+" NOT IN(")
 				for i, is_first := 0, true; i < op_len; i++ {
+					r_args.Set(reflect.Append(r_args, r_oprand1.Index(i)))
 					if is_first {
-						(*buf)[*off] = '?'
-						*off++
 						is_first = false
 					} else {
-						*off += copy((*buf)[*off:], ", ?")
-					}
-				}
-				(*buf)[*off] = ')'
-				*off++
-			}
-		case reflect.Array:
-			if op_len := r_oprand1.Len(); op_len <= 0 {
-				return err_skip_expr
-			} else {
-				r_args := reflect.ValueOf(args).Elem()
-				for i := 0; i < op_len; i++ {
-					r_args.Set(reflect.Append(r_args, r_oprand1.Index(i)))
-				}
-				*off += copy((*buf)[*off:], e.field+" IN(")
-				for i, is_first := 0, true; i < op_len; i++ {
-					if is_first {
-						(*buf)[*off] = '?'
+						(*buf)[*off] = ','
 						*off++
-						is_first = false
-					} else {
-						*off += copy((*buf)[*off:], ", ?")
+						(*buf)[*off] = ' '
+						*off++
 					}
+					(*buf)[*off] = '?'
+					*off++
 				}
 				(*buf)[*off] = ')'
 				*off++
@@ -391,6 +352,45 @@ func expr_to_string(e *Expr, args *SqlArgs, buf *[]byte, off *int) error {
 		} else {
 			args.append(e.oprand1)
 			*off += copy((*buf)[*off:], e.field+" = ?")
+		}
+	case OP_VALUES:
+		r_oprand1 := reflect.ValueOf(e.oprand1)
+		switch r_oprand1.Kind() {
+		case reflect.Slice, reflect.Array:
+			if op_len := r_oprand1.Len(); op_len <= 0 {
+				return err_skip_expr
+			} else {
+				r_args := reflect.ValueOf(args).Elem()
+				(*buf)[*off] = '('
+				*off++
+				for i, is_first := 0, true; i < op_len; i++ {
+					if is_first {
+						is_first = false
+					} else {
+						(*buf)[*off] = ','
+						*off++
+						(*buf)[*off] = ' '
+						*off++
+					}
+					if v, ok := r_oprand1.Index(i).Interface().(*Expr); ok {
+						(*buf)[*off] = '('
+						*off++
+						if err := expr_to_string(v, args, buf, off); err != nil {
+							return err
+						}
+						(*buf)[*off] = ')'
+						*off++
+					} else {
+						r_args.Set(reflect.Append(r_args, r_oprand1.Index(i)))
+						(*buf)[*off] = '?'
+						*off++
+					}
+				}
+				(*buf)[*off] = ')'
+				*off++
+			}
+		default:
+			return fmt.Errorf("<specify non-slice/non-array value to {%s VALUES(?)}>", e.field)
 		}
 	case OP_LITERAL:
 		*off += copy((*buf)[*off:], e.oprand1.(string))
@@ -542,6 +542,10 @@ func E_not(d *Expr) *Expr {
 
 func E_assign(f string, d interface{}) *Expr {
 	return &Expr{op: OP_ASSIGN, field: f, oprand1: d}
+}
+
+func E_values(d ...interface{}) *Expr {
+	return &Expr{op: OP_VALUES, oprand1: d}
 }
 
 func E_field(f string) *Expr {

@@ -384,6 +384,46 @@ func Test_parse_expr_assign_expr(t *testing.T) {
 	}
 }
 
+func Test_parse_expr_values_direct(t *testing.T) {
+	if query, args, err := parse_expr(
+		E_values(1, "goosman-lei", "password"),
+	); err != nil {
+		t.Logf("parse error: %s", err)
+		t.Fail()
+	} else if query != "(?, ?, ?)" {
+		t.Logf("wrong query: %s", query)
+		t.Fail()
+	} else {
+		expect_args := []interface{}{1, "goosman-lei", "password"}
+		for i, v := range expect_args {
+			if v != args[i] {
+				t.Logf("wrong args at index[%d]. want: %#v, real: %#v", i, v, args[i])
+				t.Fail()
+			}
+		}
+	}
+}
+
+func Test_parse_expr_values_expr(t *testing.T) {
+	if query, args, err := parse_expr(
+		E_values(1, "goosman-lei", E_literal("unix_timestamp(now())")),
+	); err != nil {
+		t.Logf("parse error: %s", err)
+		t.Fail()
+	} else if query != "(?, ?, (unix_timestamp(now())))" {
+		t.Logf("wrong query: %s", query)
+		t.Fail()
+	} else {
+		expect_args := []interface{}{1, "goosman-lei"}
+		for i, v := range expect_args {
+			if v != args[i] {
+				t.Logf("wrong args at index[%d]. want: %#v, real: %#v", i, v, args[i])
+				t.Fail()
+			}
+		}
+	}
+}
+
 func Test_parse_expr_field(t *testing.T) {
 	if query, _, err := parse_expr(
 		E_field("name"),
