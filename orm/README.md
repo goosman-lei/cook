@@ -58,12 +58,6 @@ func MultiLoad(uids []int) ([]*M_User, error) {
 
 ```
 // user.go
-| id               | int(10) unsigned               | NO   | PRI | NULL    | auto_increment |
-| passwd           | varchar(255)                   | NO   |     |         |                |
-| name             | varchar(32)                    | NO   | MUL |         |                |
-| avatar           | varchar(80)                    | NO   |     | NULL    |                |
-| avatar_time      | int(10)                        | NO   |     | 0       |                |
-| description      | mediumtext                     | NO   |     | NULL    |                |
 package user
 
 import (
