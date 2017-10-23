@@ -32,6 +32,10 @@ func (g *God) One(s *cook_sql.Statement) (interface{}, error) {
 		return nil, err
 	}
 
+	if !rows.Next() {
+		return nil, nil
+	}
+
 	if cols, err = rows.Columns(); err != nil {
 		return nil, err
 	}
@@ -47,7 +51,6 @@ func (g *God) One(s *cook_sql.Statement) (interface{}, error) {
 		argv = append(argv, reflect.ValueOf(m).Elem().FieldByName(fName).Addr().Interface())
 	}
 
-	rows.Next()
 	if err = rows.Scan(argv...); err != nil {
 		return nil, err
 	}
