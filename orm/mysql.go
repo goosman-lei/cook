@@ -1,4 +1,4 @@
-package connector
+package orm
 
 import (
 	"database/sql"
@@ -38,6 +38,8 @@ func SetupMysql(configs map[string]MysqlConf) error {
 		db.SetMaxOpenConns(config.MaxOpen)
 		mysqlConnMapping.Set(sn, db)
 	}
+
+	init_conn_of_gods()
 	return nil
 }
 
