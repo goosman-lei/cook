@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-ini/ini"
 	"os"
@@ -9,6 +10,10 @@ import (
 
 const (
 	INI_FILE_SUFFIX = ".ini"
+)
+
+var (
+	ErrSectionNotExists = errors.New("section not exists")
 )
 
 func Ini_open_dir(dname string) (*ini.File, error) {
