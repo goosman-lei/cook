@@ -61,6 +61,10 @@ func NewMServer(cfg MSvrConf, ops MSvrOps) *MServer {
 	return s
 }
 
+func (s *MServer) GetListenAddrs() []string {
+	return s.Cfg.ListenAddrs
+}
+
 func (s *MServer) Startup() (err error) {
 	// listening
 	if err = s.Ls.listen(); err != nil {
