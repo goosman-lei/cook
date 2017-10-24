@@ -1,4 +1,4 @@
-package model
+package orm
 
 import (
 	cook_conn "gitlab.niceprivate.com/golang/cook/connector"

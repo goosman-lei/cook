@@ -1,4 +1,4 @@
-package connector
+package orm
 
 import (
 	"database/sql"

@@ -1,4 +1,4 @@
-package connector
+package orm
 
 import (
 	"database/sql"
@@ -18,10 +18,9 @@ type MysqlConf struct {
 	MaxOpen int
 }
 
-var mysqlConnMapping *cook_util.CMap
+var mysqlConnMapping *cook_util.CMap = cook_util.NewCMap()
 
 func SetupMysql(configs map[string]MysqlConf) error {
-	mysqlConnMapping = cook_util.NewCMap()
 	for sn, config := range configs {
 		db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8",
 			config.Username, config.Password, config.Addr, config.Database))
@@ -39,6 +38,8 @@ func SetupMysql(configs map[string]MysqlConf) error {
 		db.SetMaxOpenConns(config.MaxOpen)
 		mysqlConnMapping.Set(sn, db)
 	}
+
+	init_conn_of_gods()
 	return nil
 }
 

@@ -1,9 +1,8 @@
-package model
+package orm
 
 import (
 	"database/sql"
 	"errors"
-	cook_conn "gitlab.niceprivate.com/golang/cook/connector"
 	cook_opt "gitlab.niceprivate.com/golang/cook/option"
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"reflect"
@@ -11,7 +10,8 @@ import (
 )
 
 var (
-	ErrInvalidModelFactory = errors.New("model's factory must return a pointer to struct")
+	ErrInvalidModelFactory        = errors.New("model's factory must return a pointer to struct")
+	Heaven                 []*God = make([]*God, 0)
 )
 
 type FieldInfo struct {
@@ -79,7 +79,6 @@ func newGod(factory func() interface{}, node string, o ...cook_opt.Option) (*God
 	var (
 		m_info *ModelInfo
 		opts   *GodOptions
-		db     *sql.DB
 		err    error
 	)
 
@@ -90,17 +89,27 @@ func newGod(factory func() interface{}, node string, o ...cook_opt.Option) (*God
 	opts = &GodOptions{}
 	cook_opt.Apply(opts, o...)
 
-	if db, err = cook_conn.GetMysql(node); err != nil {
-		return nil, err
-	} else {
-		return &God{
-			Factory: factory,
-			Node:    node,
-			Opts:    opts,
-			DB:      db,
-			Model:   m_info,
-		}, nil
+	god := &God{
+		Factory: factory,
+		Node:    node,
+		Opts:    opts,
+		Model:   m_info,
 	}
+
+	Heaven = append(Heaven, god)
+
+	return god, nil
+}
+
+func init_conn_of_gods() error {
+	for _, god := range Heaven {
+		if db, err := GetMysql(god.Node); err != nil {
+			return err
+		} else {
+			god.DB = db
+		}
+	}
+	return nil
 }
 
 func buildModelInfo(factory func() interface{}) (*ModelInfo, error) {
