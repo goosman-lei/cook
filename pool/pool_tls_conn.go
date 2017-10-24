@@ -1,60 +1,60 @@
 package pool
 
 import (
-	"net"
+	"crypto/tls"
 	"time"
 )
 
-type Pool_conn struct {
+type Pool_tls_conn struct {
 	*Pool
 }
 
-type Pool_conn_obj struct {
-	net.Conn
-	pc *Pool_conn
+type Pool_tls_conn_obj struct {
+	tls.Conn
+	ptc *Pool_tls_conn
 }
 
-func NewPool_conn(c int, factory func() (net.Conn, error)) *Pool_conn {
-	pc := &Pool_conn{}
-	pc.Pool = new_pool(c, func() (interface{}, error) {
+func NewPool_tls_conn(c int, factory func() (tls.Conn, error)) *Pool_tls_conn {
+	ptc := &Pool_tls_conn{}
+	ptc.Pool = new_pool(c, func() (interface{}, error) {
 		if c, err := factory(); err != nil {
 			return nil, err
 		} else {
-			return &Pool_conn_obj{
+			return &Pool_tls_conn_obj{
 				Conn: c,
-				pc:   pc,
+				ptc:  ptc,
 			}, nil
 		}
 	}, func(d interface{}) {
-		if c, ok := d.(*Pool_conn_obj); ok {
+		if c, ok := d.(*Pool_tls_conn_obj); ok {
 			c.Conn.Close()
 		}
 	})
 
-	return pc
+	return ptc
 }
 
-func (pc *Pool_conn) Get() (*Pool_conn_obj, error) {
-	if c, err := pc.get(); err != nil {
+func (ptc *Pool_tls_conn) Get() (*Pool_tls_conn_obj, error) {
+	if c, err := ptc.get(); err != nil {
 		return nil, err
-	} else if v, ok := c.(*Pool_conn_obj); !ok {
+	} else if v, ok := c.(*Pool_tls_conn_obj); !ok {
 		return nil, ErrNotWrapper
 	} else {
 		return v, nil
 	}
 }
 
-func (pc *Pool_conn) Get_timeout(duration time.Duration) (*Pool_conn_obj, error) {
-	if c, err := pc.get_timeout(duration); err != nil {
+func (ptc *Pool_tls_conn) Get_timeout(duration time.Duration) (*Pool_tls_conn_obj, error) {
+	if c, err := ptc.get_timeout(duration); err != nil {
 		return nil, err
-	} else if v, ok := c.(*Pool_conn_obj); !ok {
+	} else if v, ok := c.(*Pool_tls_conn_obj); !ok {
 		return nil, ErrNotWrapper
 	} else {
 		return v, nil
 	}
 }
 
-func (pwc *Pool_conn_obj) Close() error {
-	pwc.pc.put(pwc)
+func (pwc *Pool_tls_conn_obj) Close() error {
+	pwc.ptc.put(pwc)
 	return nil
 }
