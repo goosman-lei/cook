@@ -1,7 +1,6 @@
 package connector
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	cook_log "gitlab.niceprivate.com/golang/cook/log"
@@ -15,17 +14,17 @@ type RedisConnWrapper struct {
 }
 
 type RedisConf struct {
-	Addrs []string `json:"addrs"`
+	Addrs []string
 
-	TestInterval time.Duration `json:"test_interval"`
+	TestInterval time.Duration
 
-	MaxActive   int           `json:"max_active"`
-	MaxIdle     int           `json:"max_idle"`
-	IdleTimeout time.Duration `json:"idle_timeout"`
+	MaxActive   int
+	MaxIdle     int
+	IdleTimeout time.Duration
 
-	ConnectTimeout time.Duration `json:"connect_timeout"`
-	ReadTimeout    time.Duration `json:"read_timeout"`
-	WriteTimeout   time.Duration `json:"write_timeout"`
+	ConnectTimeout time.Duration
+	ReadTimeout    time.Duration
+	WriteTimeout   time.Duration
 }
 
 var redisConnMapping *cook_util.CMap
@@ -67,8 +66,6 @@ func SetupRedis(configs map[string]RedisConf) error {
 			},
 		})
 	}
-	jsonConfig, _ := json.Marshal(configs)
-	cook_log.Debugf("setup redis with configs: %s", jsonConfig)
 	return nil
 }
 
