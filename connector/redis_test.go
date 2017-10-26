@@ -3,22 +3,31 @@ package connector
 import (
 	"github.com/garyburd/redigo/redis"
 	"net"
+	"reflect"
 	"testing"
 	"time"
+	"unsafe"
 )
 
-var skipRedis bool = false
+var (
+	testAddr_1 string = "10.10.200.10:6850"
+	testAddr_2 string = "10.10.200.10:6857"
+	skipRedis  bool   = false
+)
 
 func init() {
-	testAddr := "10.10.200.10:6850"
-	if _, err := net.DialTimeout("tcp", testAddr, 1000*time.Millisecond); err != nil {
+	if _, err := net.DialTimeout("tcp", testAddr_1, 1000*time.Millisecond); err != nil {
+		skipRedis = true
+		return
+	}
+	if _, err := net.DialTimeout("tcp", testAddr_2, 1000*time.Millisecond); err != nil {
 		skipRedis = true
 		return
 	}
 
 	configs := map[string]RedisConf{
 		"cluster1": RedisConf{
-			Addrs:          []string{testAddr},
+			Addrs:          []string{testAddr_1},
 			TestInterval:   time.Minute,
 			MaxActive:      16,
 			MaxIdle:        16,
@@ -28,7 +37,7 @@ func init() {
 			WriteTimeout:   1000 * time.Millisecond,
 		},
 		"cluster2": RedisConf{
-			Addrs:          []string{testAddr},
+			Addrs:          []string{testAddr_2},
 			TestInterval:   time.Minute,
 			MaxActive:      16,
 			MaxIdle:        16,
@@ -40,6 +49,26 @@ func init() {
 	}
 
 	SetupRedis(configs)
+}
+
+func Test_GetRedis(t *testing.T) {
+	c1 := MustGetRedis("cluster1")
+	c2 := MustGetRedis("cluster2")
+
+	r_c1_conn_ptr := reflect.ValueOf(c1.Conn).Elem().FieldByName("c").Elem().Elem().FieldByName("conn").Elem().Pointer()
+	r_c1_conn := (*net.TCPConn)(unsafe.Pointer(r_c1_conn_ptr))
+	if r_c1_conn.RemoteAddr().String() != testAddr_1 {
+		t.Logf("cluster1 address wrong: want %s, actually %s", testAddr_1, r_c1_conn.RemoteAddr().String())
+		t.Fail()
+	}
+
+	r_c2_conn_ptr := reflect.ValueOf(c2.Conn).Elem().FieldByName("c").Elem().Elem().FieldByName("conn").Elem().Pointer()
+	r_c2_conn := (*net.TCPConn)(unsafe.Pointer(r_c2_conn_ptr))
+	if r_c2_conn.RemoteAddr().String() != testAddr_2 {
+		t.Logf("cluster2 address wrong: want %s, actually %s", testAddr_2, r_c2_conn.RemoteAddr().String())
+		t.Fail()
+	}
+
 }
 
 func TestRedis(t *testing.T) {
