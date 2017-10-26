@@ -27,7 +27,8 @@ func OpenFileWithMkdir(path string, flag int, perm os.FileMode) (*os.File, error
 }
 
 func IsFileExist(path string) bool {
-	if fd, err := os.Stat(path); err != nil {
+	fd, err := os.Stat(path)
+	if err != nil {
 		return false
 	}
 
