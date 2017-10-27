@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-ini/ini"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -27,24 +28,21 @@ func Ini_open_dir(dname string) (*ini.File, error) {
 		return nil, err
 	}
 
+	init_ref_config(dname)
+
 	fp := ini.Empty()
 
 	for _, fname := range fnames {
 		if !strings.HasSuffix(fname, INI_FILE_SUFFIX) {
 			continue
 		}
-
-		fullFpath := dname + "/" + fname
-
-		fInfo, err := os.Stat(fullFpath)
-		if err != nil {
-			return nil, err
-		}
-		if !fInfo.Mode().IsRegular() {
+		if is_ref_file(fname) {
 			continue
 		}
 
-		if err := fp.Append(fullFpath); err != nil {
+		if content, err := ioutil.ReadFile(dname + "/" + fname); err != nil {
+			return nil, err
+		} else if err := fp.Append([]byte(replace_with_ref(string(content)))); err != nil {
 			return nil, err
 		}
 	}
