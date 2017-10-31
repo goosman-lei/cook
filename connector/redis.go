@@ -27,44 +27,46 @@ type RedisConf struct {
 	WriteTimeout   time.Duration
 }
 
-var redisConnMapping *cook_util.CMap
+var redisConnMapping *cook_util.CMap = cook_util.NewCMap()
+
+func setup_one_redis(sn string, config RedisConf) {
+	redisConnMapping.Set(sn, &redis.Pool{
+		MaxActive:   config.MaxActive,
+		MaxIdle:     config.MaxIdle,
+		IdleTimeout: config.IdleTimeout,
+		Wait:        true,
+		Dial: func() (redis.Conn, error) {
+			var (
+				addr string
+				conn redis.Conn
+				err  error
+			)
+			addr = config.Addrs[rand.Intn(len(config.Addrs))]
+			conn, err = redis.DialTimeout("tcp", addr, config.ConnectTimeout, config.ReadTimeout, config.WriteTimeout)
+			if err != nil {
+				cook_log.Warnf("connect to redis[%s] failed: %s", addr, err)
+				return nil, err
+			}
+
+			_, err = conn.Do("PING")
+			if err != nil {
+				return nil, err
+			}
+			return conn, nil
+		},
+		TestOnBorrow: func(conn redis.Conn, t time.Time) error {
+			if time.Since(t) < config.TestInterval {
+				return nil
+			}
+			_, err := conn.Do("PING")
+			return err
+		},
+	})
+}
 
 func SetupRedis(configs map[string]RedisConf) error {
-	redisConnMapping = cook_util.NewCMap()
-
 	for sn, config := range configs {
-		redisConnMapping.Set(sn, &redis.Pool{
-			MaxActive:   config.MaxActive,
-			MaxIdle:     config.MaxIdle,
-			IdleTimeout: config.IdleTimeout,
-			Wait:        true,
-			Dial: func() (redis.Conn, error) {
-				var (
-					addr string
-					conn redis.Conn
-					err  error
-				)
-				addr = config.Addrs[rand.Intn(len(config.Addrs))]
-				conn, err = redis.DialTimeout("tcp", addr, config.ConnectTimeout, config.ReadTimeout, config.WriteTimeout)
-				if err != nil {
-					cook_log.Warnf("connect to redis[%s] failed: %s", addr, err)
-					return nil, err
-				}
-
-				_, err = conn.Do("PING")
-				if err != nil {
-					return nil, err
-				}
-				return conn, nil
-			},
-			TestOnBorrow: func(conn redis.Conn, t time.Time) error {
-				if time.Since(t) < config.TestInterval {
-					return nil
-				}
-				_, err := conn.Do("PING")
-				return err
-			},
-		})
+		setup_one_redis(sn, config)
 	}
 	return nil
 }

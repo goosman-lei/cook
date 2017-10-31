@@ -5,6 +5,7 @@ import (
 	cook_sql "gitlab.niceprivate.com/golang/cook/sql/mysql"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type M_User struct {
@@ -27,8 +28,9 @@ func init() {
 			Password: "Cb84eZaa229ddnm",
 			Database: "kkgoo",
 
-			MaxIdle: 4,
-			MaxOpen: 4,
+			MaxIdle:     4,
+			MaxOpen:     4,
+			MaxLifeTime: time.Minute * 10,
 		},
 	}
 

@@ -1,4 +1,4 @@
-package orm
+package connector
 
 import (
 	"database/sql"
@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	cook_log "gitlab.niceprivate.com/golang/cook/log"
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
+	"time"
 )
 
 type MysqlConf struct {
@@ -14,8 +15,9 @@ type MysqlConf struct {
 	Password string
 	Database string
 
-	MaxIdle int
-	MaxOpen int
+	MaxIdle     int
+	MaxOpen     int
+	MaxLifeTime time.Duration
 }
 
 var mysqlConnMapping *cook_util.CMap = cook_util.NewCMap()
@@ -34,12 +36,12 @@ func SetupMysql(configs map[string]MysqlConf) error {
 				sn, config.Username, config.Addr, config.Database)
 			return fmt.Errorf("ping failed[%s]: %s@%s/%s", sn, config.Username, config.Addr, config.Database)
 		}
+		db.SetConnMaxLifetime(config.MaxLifeTime)
 		db.SetMaxIdleConns(config.MaxIdle)
 		db.SetMaxOpenConns(config.MaxOpen)
 		mysqlConnMapping.Set(sn, db)
 	}
 
-	init_conn_of_gods()
 	return nil
 }
 

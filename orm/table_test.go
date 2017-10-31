@@ -4,6 +4,7 @@ import (
 	cook_conn "gitlab.niceprivate.com/golang/cook/connector"
 	cook_sql "gitlab.niceprivate.com/golang/cook/sql/mysql"
 	"testing"
+	"time"
 )
 
 type M_Obj struct {
@@ -24,8 +25,9 @@ func init() {
 			Password: "Cb84eZaa229ddnm",
 			Database: "kkgoo",
 
-			MaxIdle: 4,
-			MaxOpen: 4,
+			MaxIdle:     4,
+			MaxOpen:     4,
+			MaxLifeTime: time.Minute * 10,
 		},
 	}
 

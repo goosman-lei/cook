@@ -30,17 +30,19 @@ func SetupAmqp(configs map[string]AMQPConf) error {
 		if config.MaxChannel < config.MaxConn {
 			config.MaxChannel = config.MaxConn
 		}
-		url := fmt.Sprintf("amqp://%s:%s@%s%s", config.Username, config.Password, config.Addr, config.Vhost)
 
-		conn_pool := cook_pool.NewPool_amqp_conn(config.MaxConn, func() (*amqp.Connection, error) {
-			return amqp.DialConfig(
-				url,
-				amqp.Config{
-					Dial: func(network, addr string) (net.Conn, error) {
-						return net.DialTimeout(network, addr, config.ConnectTimeout)
-					},
-				})
-		})
+		conn_pool := func(c AMQPConf) *cook_pool.Pool_amqp_conn {
+			url := fmt.Sprintf("amqp://%s:%s@%s%s", c.Username, c.Password, c.Addr, c.Vhost)
+			return cook_pool.NewPool_amqp_conn(c.MaxConn, func() (*amqp.Connection, error) {
+				return amqp.DialConfig(
+					url,
+					amqp.Config{
+						Dial: func(network, addr string) (net.Conn, error) {
+							return net.DialTimeout(network, addr, c.ConnectTimeout)
+						},
+					})
+			})
+		}(config)
 
 		func(p *cook_pool.Pool_amqp_conn, c AMQPConf, s string) {
 			amqp_pool_mapping.Set(s, cook_pool.NewPool_amqp_channel(c.MaxChannel, func() (*amqp.Channel, error) {

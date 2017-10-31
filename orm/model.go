@@ -2,8 +2,13 @@ package orm
 
 import (
 	"database/sql"
+	"errors"
 	cook_sql "gitlab.niceprivate.com/golang/cook/sql/mysql"
 	"reflect"
+)
+
+var (
+	ErrConnNotReady = errors.New("connection not ready")
 )
 
 /*
@@ -14,6 +19,7 @@ import (
 
 func (g *God) One(s *cook_sql.Statement) (interface{}, error) {
 	var (
+		db        *sql.DB
 		query     string
 		queryArgs cook_sql.SqlArgs
 		err       error
@@ -24,11 +30,16 @@ func (g *God) One(s *cook_sql.Statement) (interface{}, error) {
 		argv  []interface{}
 		m     interface{}
 	)
+
+	if db = g.DB(); db == nil {
+		return nil, ErrConnNotReady
+	}
+
 	if query, queryArgs, err = s.Parse(); err != nil {
 		return nil, err
 	}
 
-	if rows, err = g.DB.Query(query, queryArgs...); err != nil {
+	if rows, err = db.Query(query, queryArgs...); err != nil {
 		return nil, err
 	}
 
@@ -65,17 +76,23 @@ func (g *God) Multi(s *cook_sql.Statement) (interface{}, error) {
 		err       error
 		rows      *sql.Rows
 		cols      []string
+		db        *sql.DB
 
 		fName   string
 		argv    []interface{}
 		m_slice []interface{}
 		m       interface{}
 	)
+
+	if db = g.DB(); db == nil {
+		return nil, ErrConnNotReady
+	}
+
 	if query, queryArgs, err = s.Parse(); err != nil {
 		return nil, err
 	}
 
-	if rows, err = g.DB.Query(query, queryArgs...); err != nil {
+	if rows, err = db.Query(query, queryArgs...); err != nil {
 		return nil, err
 	}
 
@@ -108,17 +125,23 @@ func (g *God) Multi(s *cook_sql.Statement) (interface{}, error) {
 
 func (g *God) Update(s *cook_sql.Statement) (int, error) {
 	var (
+		db            *sql.DB
 		query         string
 		queryArgs     cook_sql.SqlArgs
 		err           error
 		result        sql.Result
 		affected_rows int64
 	)
+
+	if db = g.DB(); db == nil {
+		return 0, ErrConnNotReady
+	}
+
 	if query, queryArgs, err = s.Parse(); err != nil {
 		return 0, err
 	}
 
-	if result, err = g.DB.Exec(query, queryArgs...); err != nil {
+	if result, err = db.Exec(query, queryArgs...); err != nil {
 		return 0, err
 	}
 
@@ -128,17 +151,23 @@ func (g *God) Update(s *cook_sql.Statement) (int, error) {
 
 func (g *God) Delete(s *cook_sql.Statement) (int, error) {
 	var (
+		db            *sql.DB
 		query         string
 		queryArgs     cook_sql.SqlArgs
 		err           error
 		result        sql.Result
 		affected_rows int64
 	)
+
+	if db = g.DB(); db == nil {
+		return 0, ErrConnNotReady
+	}
+
 	if query, queryArgs, err = s.Parse(); err != nil {
 		return 0, err
 	}
 
-	if result, err = g.DB.Exec(query, queryArgs...); err != nil {
+	if result, err = db.Exec(query, queryArgs...); err != nil {
 		return 0, err
 	}
 
@@ -148,17 +177,23 @@ func (g *God) Delete(s *cook_sql.Statement) (int, error) {
 
 func (g *God) Insert(s *cook_sql.Statement) (int, error) {
 	var (
+		db        *sql.DB
 		query     string
 		queryArgs cook_sql.SqlArgs
 		err       error
 		result    sql.Result
 		last_id   int64
 	)
+
+	if db = g.DB(); db == nil {
+		return 0, ErrConnNotReady
+	}
+
 	if query, queryArgs, err = s.Parse(); err != nil {
 		return 0, err
 	}
 
-	if result, err = g.DB.Exec(query, queryArgs...); err != nil {
+	if result, err = db.Exec(query, queryArgs...); err != nil {
 		return 0, err
 	}
 

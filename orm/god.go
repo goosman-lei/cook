@@ -3,6 +3,7 @@ package orm
 import (
 	"database/sql"
 	"errors"
+	cook_conn "gitlab.niceprivate.com/golang/cook/connector"
 	cook_opt "gitlab.niceprivate.com/golang/cook/option"
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"reflect"
@@ -40,9 +41,20 @@ type GodOptions struct {
 type God struct {
 	Factory func() interface{} // factory of model
 	Node    string             // used node
-	DB      *sql.DB            // handler
+	db      *sql.DB            // handler
 	Model   *ModelInfo
 	Opts    *GodOptions
+}
+
+func (g *God) DB() *sql.DB {
+	if g.db == nil {
+		if db, err := cook_conn.GetMysql(g.Node); err != nil {
+			return nil
+		} else {
+			g.db = db
+		}
+	}
+	return g.db
 }
 
 func NewGod_shard_none(factory func() interface{}, node string, name string) (*God, error) {
@@ -99,17 +111,6 @@ func newGod(factory func() interface{}, node string, o ...cook_opt.Option) (*God
 	Heaven = append(Heaven, god)
 
 	return god, nil
-}
-
-func init_conn_of_gods() error {
-	for _, god := range Heaven {
-		if db, err := GetMysql(god.Node); err != nil {
-			return err
-		} else {
-			god.DB = db
-		}
-	}
-	return nil
 }
 
 func buildModelInfo(factory func() interface{}) (*ModelInfo, error) {
