@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/go-ini/ini"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"regexp"
 	"strings"
 )
@@ -10,7 +11,7 @@ var (
 	ref_fname                    = "ref.ini"
 	ref_config map[string]string = make(map[string]string)
 
-	pattern_ref = regexp.MustCompile("\\{\\$[-\\w]+\\.[-\\w]+\\}")
+	pattern_ref = regexp.MustCompile("\\{\\$[-\\.\\w]+\\}")
 )
 
 func Set_ref_fname(fname string) {
@@ -31,12 +32,13 @@ func init_ref_config(dname string) error {
 		fp    *ini.File
 		err   error
 	)
-	// refresh every time
-	ref_config = make(map[string]string)
 
 	// open as ini.File
 	fp = ini.Empty()
 	if err = fp.Append(fname); err != nil {
+		if cook_util.Err_NoSuchFileOrDir(err) {
+			return nil
+		}
 		return err
 	}
 
