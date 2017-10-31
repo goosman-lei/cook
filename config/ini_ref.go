@@ -17,6 +17,10 @@ func Set_ref_fname(fname string) {
 	ref_fname = fname
 }
 
+func Register_ref(key, value string) {
+	ref_config[key] = value
+}
+
 func is_ref_file(fname string) bool {
 	return fname == ref_fname
 }
