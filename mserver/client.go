@@ -127,9 +127,8 @@ func (c *MClient) Offline() {
 	defer func() {
 		if r := recover(); r != nil {
 			c.Warnf("panic-offline: %q", r)
+			c.Svr.wg.Done()
 		}
-		// anyway, we must cancel server's waitgroup
-		c.Svr.wg.Done()
 	}()
 	if !c.Svr.ClientMap.CheckAndErase(c.Sn_literal, func(oc interface{}) bool {
 		return oc.(*MClient) == c
@@ -142,6 +141,7 @@ func (c *MClient) Offline() {
 	close(c.msgQueue)
 	c.Conn.Close()
 	c.wg.Wait()
+	c.Svr.wg.Done()
 }
 
 func (c *MClient) Send(msg interface{}) (err error) {
