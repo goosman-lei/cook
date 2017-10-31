@@ -4,6 +4,7 @@ import (
 	cook_log "gitlab.niceprivate.com/golang/cook/log"
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"sync"
+	"time"
 )
 
 type MSvrConf struct {
@@ -41,6 +42,8 @@ type MServer struct {
 
 	wg     *sync.WaitGroup
 	doneCh chan bool
+
+	StartupTime time.Time
 }
 
 func NewMServer(cfg MSvrConf, ops MSvrOps) *MServer {
@@ -79,6 +82,8 @@ func (s *MServer) Startup() (err error) {
 
 	// accept
 	s.Ls.accept()
+
+	s.StartupTime = time.Now()
 
 	return
 }
