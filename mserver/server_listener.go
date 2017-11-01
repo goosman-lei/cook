@@ -155,7 +155,11 @@ func (ls *MListeners) upgrade_done() {
 // running util server status is not running
 func (l *MListener) accept() {
 	l.Svr.wg.Add(1)
-	defer l.Svr.wg.Done()
+	l.Svr.Debugf("server wait-group +1: MListener.accept()#begin")
+	defer func() {
+		l.Svr.wg.Done()
+		l.Svr.Debugf("server wait-group -1: MListener.accept()#defer")
+	}()
 	var (
 		conn *net.TCPConn
 		err  error
