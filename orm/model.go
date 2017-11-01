@@ -42,6 +42,7 @@ func (g *God) One(s *cook_sql.Statement) (interface{}, error) {
 	if rows, err = db.Query(query, queryArgs...); err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	if !rows.Next() {
 		return nil, nil
@@ -95,6 +96,7 @@ func (g *God) Multi(s *cook_sql.Statement) (interface{}, error) {
 	if rows, err = db.Query(query, queryArgs...); err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	if cols, err = rows.Columns(); err != nil {
 		return nil, err
