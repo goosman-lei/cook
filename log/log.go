@@ -92,7 +92,7 @@ func NewLogger(level uint8, path string) *Logger {
 		fpath: path,
 	}
 
-	l.Logger = log.New(os.Stderr, prefix, log.Ldate|log.Lmicroseconds)
+	l.Logger = log.New(os.Stderr, prefix, log.Ldate|log.Lmicroseconds|log.Lshortfile)
 	l.setup_file()
 
 	return l
@@ -128,17 +128,17 @@ func (l *Logger) setup_file() {
 }
 
 func Debugf(f string, argv ...interface{}) {
-	Ldebug.Printf(f, argv...)
+	Ldebug.Output(2, fmt.Sprintf(f, argv...))
 }
 
 func Infof(f string, argv ...interface{}) {
-	Linfo.Printf(f, argv...)
+	Linfo.Output(2, fmt.Sprintf(f, argv...))
 }
 
 func Warnf(f string, argv ...interface{}) {
-	Lwarn.Printf(f, argv...)
+	Lwarn.Output(2, fmt.Sprintf(f, argv...))
 }
 
 func Fatalf(f string, argv ...interface{}) {
-	Lfatal.Printf(f, argv...)
+	Lfatal.Output(2, fmt.Sprintf(f, argv...))
 }
