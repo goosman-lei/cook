@@ -1,4 +1,4 @@
-package file
+package os
 
 import (
 	cook_util "gitlab.niceprivate.com/golang/cook/util"

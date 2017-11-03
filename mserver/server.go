@@ -4,6 +4,7 @@ import (
 	cook_log "gitlab.niceprivate.com/golang/cook/log"
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"sync"
+	"time"
 )
 
 type MSvrConf struct {
@@ -41,6 +42,8 @@ type MServer struct {
 
 	wg     *sync.WaitGroup
 	doneCh chan bool
+
+	StartupTime time.Time
 }
 
 func NewMServer(cfg MSvrConf, ops MSvrOps) *MServer {
@@ -80,6 +83,8 @@ func (s *MServer) Startup() (err error) {
 	// accept
 	s.Ls.accept()
 
+	s.StartupTime = time.Now()
+
 	return
 }
 
@@ -110,7 +115,9 @@ func (s *MServer) Shutdown(reason string) {
 		c.(*MClient).Offline()
 	}
 
+	s.Debugf("wait server done(shutdown): begin")
 	s.wg.Wait()
+	s.Debugf("wait server done(shutdown): done")
 }
 
 func (s *MServer) Upgrade_prepare() error {
@@ -144,7 +151,9 @@ func (s *MServer) Upgrade_done() {
 }
 
 func (s *MServer) Wait() {
+	s.Debugf("wait server done(MServer.Wait()): begin")
 	s.wg.Wait()
+	s.Debugf("wait server done(MServer.Wait()): end")
 }
 
 /*

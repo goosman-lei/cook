@@ -67,5 +67,5 @@ func (p *Pool_amqp_channel_obj) Produce_normal(payload, exchange, routingKey str
 }
 
 func (p *Pool_amqp_channel_obj) Consume_normal(queue string) (<-chan amqp.Delivery, error) {
-	return p.Consume(queue, "", true, false, false, false, nil)
+	return p.Consume(queue, "", false, false, false, false, nil)
 }

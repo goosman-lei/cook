@@ -1,7 +1,7 @@
 package mserver
 
 import (
-	"bytes"
+	//"bytes"
 	"encoding/binary"
 	"fmt"
 	cook_io "gitlab.niceprivate.com/golang/cook/io"
@@ -54,11 +54,11 @@ func update_message_status(clientNo int, seqnum, status int) {
 }
 
 func TestCase(t *testing.T) {
-	bw := new(bytes.Buffer)
-	cook_log.Ldebug.SetOutput(bw)
-	cook_log.Linfo.SetOutput(bw)
-	cook_log.Lwarn.SetOutput(bw)
-	cook_log.Lfatal.SetOutput(bw)
+	//bw := new(bytes.Buffer)
+	//cook_log.Ldebug.SetOutput(bw)
+	//cook_log.Linfo.SetOutput(bw)
+	//cook_log.Lwarn.SetOutput(bw)
+	//cook_log.Lfatal.SetOutput(bw)
 	go func() {
 		log.Println(http.ListenAndServe("10.10.200.12:6060", nil))
 	}()
@@ -222,6 +222,7 @@ func ops_client_online(c *MClient) error {
 }
 
 func ops_client_offline(c *MClient) error {
+	panic("Test for panic in offline")
 	c.Debugf("ops_client_offline")
 	return nil
 }

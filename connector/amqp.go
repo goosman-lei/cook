@@ -32,7 +32,7 @@ func SetupAmqp(configs map[string]AMQPConf) error {
 		}
 
 		conn_pool := func(c AMQPConf) *cook_pool.Pool_amqp_conn {
-			url := fmt.Sprintf("amqp://%s:%s@%s%s", c.Username, c.Password, c.Addr, c.Vhost)
+			url := fmt.Sprintf("amqp://%s:%s@%s/%s", c.Username, c.Password, c.Addr, c.Vhost)
 			return cook_pool.NewPool_amqp_conn(c.MaxConn, func() (*amqp.Connection, error) {
 				return amqp.DialConfig(
 					url,

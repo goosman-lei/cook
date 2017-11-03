@@ -3,7 +3,6 @@ package connector
 import (
 	"context"
 	"errors"
-	//"fmt"
 	etcd "github.com/coreos/etcd/client"
 	"path/filepath"
 	"strings"

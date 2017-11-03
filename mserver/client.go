@@ -53,10 +53,12 @@ func NewMClient(conn *net.TCPConn, svr *MServer) *MClient {
 
 func (c *MClient) run() {
 	c.Svr.wg.Add(1)
+	c.Debugf("server wait-group +1: MClient.run()#begin")
 	defer func() {
 		if r := recover(); r != nil {
 			// if panic in c.Svr.Ops.ClientOnline, we must cancel waitgroup manual
 			c.Svr.wg.Done()
+			c.Debugf("server wait-group -1: MClient.run()#recover")
 			c.Warnf("panic-client-run: %q", r)
 		}
 	}()
@@ -73,6 +75,7 @@ func (c *MClient) run() {
 	c.Svr.ClientMap.Set(c.Sn_literal, c)
 
 	c.wg.Add(2) // send loop and recv loop
+	c.Debugf("client wait-group +2: MClient.run()#send_and_recv_loop")
 	go c.sendLoop()
 
 	c.recvLoop()
@@ -81,6 +84,7 @@ func (c *MClient) run() {
 func (c *MClient) sendLoop() {
 	defer func() {
 		c.wg.Done()
+		c.Debugf("client wait-group -1: MClient.sendLoop()#defer")
 		c.Offline()
 		if r := recover(); r != nil {
 			c.Warnf("panic-sendloop: %q", r)
@@ -110,6 +114,7 @@ SendHandlerLoop:
 func (c *MClient) recvLoop() {
 	defer func() {
 		c.wg.Done()
+		c.Debugf("client wait-group -1: MClient.recvLoop()#defer")
 		c.Offline()
 		if r := recover(); r != nil {
 			c.Warnf("panic-recvloop: %q", r)
@@ -127,9 +132,9 @@ func (c *MClient) Offline() {
 	defer func() {
 		if r := recover(); r != nil {
 			c.Warnf("panic-offline: %q", r)
+			c.Debugf("server wait-group -1: MClient.Offline()#defer")
+			c.Svr.wg.Done()
 		}
-		// anyway, we must cancel server's waitgroup
-		c.Svr.wg.Done()
 	}()
 	if !c.Svr.ClientMap.CheckAndErase(c.Sn_literal, func(oc interface{}) bool {
 		return oc.(*MClient) == c
@@ -141,7 +146,11 @@ func (c *MClient) Offline() {
 	c.Svr.Ops.ClientOffline(c)
 	close(c.msgQueue)
 	c.Conn.Close()
+	c.Debugf("wait client done: begin")
 	c.wg.Wait()
+	c.Debugf("wait client done: end")
+	c.Debugf("server wait-group -1: MClient.Offline()#end")
+	c.Svr.wg.Done()
 }
 
 func (c *MClient) Send(msg interface{}) (err error) {
