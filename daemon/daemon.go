@@ -36,7 +36,19 @@ func Daemonize() (bool, error) {
 	} else {
 		return true, do_daemon()
 	}
+}
 
+func CleanEnviron() []string {
+	r_env := []string{}
+	for _, e := range os.Environ() {
+		switch {
+		case strings.HasPrefix(e, ENV_NAME_DAEMON_STAGE+"="):
+		case strings.HasPrefix(e, ENV_NAME_LIVING_UPGRADE+"="):
+		default:
+			r_env = append(r_env, e)
+		}
+	}
+	return r_env
 }
 
 func Upgrade() error {
