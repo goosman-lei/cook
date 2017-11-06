@@ -115,9 +115,7 @@ func (s *MServer) Shutdown(reason string) {
 		c.(*MClient).Offline()
 	}
 
-	s.Debugf("wait server done(shutdown): begin")
 	s.wg.Wait()
-	s.Debugf("wait server done(shutdown): done")
 }
 
 func (s *MServer) Upgrade_prepare() error {
@@ -151,9 +149,7 @@ func (s *MServer) Upgrade_done() {
 }
 
 func (s *MServer) Wait() {
-	s.Debugf("wait server done(MServer.Wait()): begin")
 	s.wg.Wait()
-	s.Debugf("wait server done(MServer.Wait()): end")
 }
 
 /*
