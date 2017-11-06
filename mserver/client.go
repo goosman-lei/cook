@@ -54,9 +54,9 @@ func NewMClient(conn *net.TCPConn, svr *MServer) *MClient {
 func (c *MClient) run() {
 	c.Svr.wg.Add(1)
 	defer func() {
+		c.Svr.wg.Done()
 		if r := recover(); r != nil {
 			// if panic in c.Svr.Ops.ClientOnline, we must cancel waitgroup manual
-			c.Svr.wg.Done()
 			c.Warnf("panic-client-run: %q", r)
 		}
 	}()
@@ -127,7 +127,6 @@ func (c *MClient) Offline() {
 	defer func() {
 		if r := recover(); r != nil {
 			c.Warnf("panic-offline: %q", r)
-			c.Svr.wg.Done()
 		}
 	}()
 	if !c.Svr.ClientMap.CheckAndErase(c.Sn_literal, func(oc interface{}) bool {
@@ -141,7 +140,6 @@ func (c *MClient) Offline() {
 	close(c.msgQueue)
 	c.Conn.Close()
 	c.wg.Wait()
-	c.Svr.wg.Done()
 }
 
 func (c *MClient) Send(msg interface{}) (err error) {
