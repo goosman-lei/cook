@@ -30,41 +30,32 @@ func NewTimeoutError(conn net.Conn, op string, usetime, timeout time.Duration) e
 	}
 }
 
-// optimize for gc on large number client recv timeout at same time, it will stop the world if use many local variable in function
-type local_scope struct {
-	begin     time.Time
-	deadline  time.Time
-	nRW       int
-	tRW       int
-	ok        bool
-	nErr      net.Error
-	nExpected int
-}
-
 func ReadN_Net(conn net.Conn, nExpected int, timeout time.Duration) (buffer []byte, err error) {
-	ls := local_scope{
-		begin:    time.Now(),
-		deadline: time.Now().Add(timeout),
-		nRW:      0,
-		tRW:      0,
-	}
+	var (
+		begin    time.Time = time.Now()
+		deadline time.Time = begin.Add(timeout)
+		nRW      int       = 0
+		tRW      int       = 0
+		ok       bool
+		nErr     net.Error
+	)
 	buffer = make([]byte, nExpected)
 
-	for ls.nRW < nExpected {
-		conn.SetReadDeadline(ls.deadline)
-		ls.tRW, err = conn.Read(buffer[ls.nRW:])
+	for nRW < nExpected {
+		conn.SetReadDeadline(deadline)
+		tRW, err = conn.Read(buffer[nRW:])
 		// have no error, add Read num
 		if err == nil {
-			ls.nRW += ls.tRW
+			nRW += tRW
 			continue
 		}
 		// timeout check
-		if ls.deadline.Sub(time.Now()).Nanoseconds() <= 0 {
-			err = NewTimeoutError(conn, "read", ls.deadline.Sub(ls.begin), timeout)
+		if deadline.Sub(time.Now()).Nanoseconds() <= 0 {
+			err = NewTimeoutError(conn, "read", deadline.Sub(begin), timeout)
 			return
 		}
 		// no net error, or no temporary error
-		if ls.nErr, ls.ok = err.(net.Error); !ls.ok || !ls.nErr.Temporary() {
+		if nErr, ok = err.(net.Error); !ok || !nErr.Temporary() {
 			return
 		}
 		// temporary net error, will continue reading
@@ -74,29 +65,31 @@ func ReadN_Net(conn net.Conn, nExpected int, timeout time.Duration) (buffer []by
 }
 
 func ReadToBuffer_Net(conn net.Conn, buffer []byte, timeout time.Duration) (err error) {
-	ls := local_scope{
-		begin:     time.Now(),
-		deadline:  time.Now().Add(timeout),
-		nExpected: len(buffer),
-		nRW:       0,
-		tRW:       0,
-	}
+	var (
+		begin     time.Time = time.Now()
+		deadline  time.Time = begin.Add(timeout)
+		nRW       int       = 0
+		nExpected int       = len(buffer)
+		tRW       int       = 0
+		ok        bool
+		nErr      net.Error
+	)
 
-	for ls.nRW < ls.nExpected {
-		conn.SetReadDeadline(ls.deadline)
-		ls.tRW, err = conn.Read(buffer[ls.nRW:])
+	for nRW < nExpected {
+		conn.SetReadDeadline(deadline)
+		tRW, err = conn.Read(buffer[nRW:])
 		// have no error, add Read num
 		if err == nil {
-			ls.nRW += ls.tRW
+			nRW += tRW
 			continue
 		}
 		// timeout check
-		if ls.deadline.Sub(time.Now()).Nanoseconds() <= 0 {
-			err = NewTimeoutError(conn, "read", ls.deadline.Sub(ls.begin), timeout)
+		if deadline.Sub(time.Now()).Nanoseconds() <= 0 {
+			err = NewTimeoutError(conn, "read", deadline.Sub(begin), timeout)
 			return
 		}
 		// no net error, or no temporary error
-		if ls.nErr, ls.ok = err.(net.Error); !ls.ok || !ls.nErr.Temporary() {
+		if nErr, ok = err.(net.Error); !ok || !nErr.Temporary() {
 			return
 		}
 		// temporary net error, will continue reading
@@ -105,32 +98,33 @@ func ReadToBuffer_Net(conn net.Conn, buffer []byte, timeout time.Duration) (err 
 }
 
 func WriteN_Net(conn net.Conn, buffer []byte, timeout time.Duration) (err error) {
-	ls := local_scope{
-		begin:     time.Now(),
-		deadline:  time.Now().Add(timeout),
-		nExpected: len(buffer),
-		nRW:       0,
-		tRW:       0,
-	}
+	var (
+		begin     time.Time = time.Now()
+		deadline  time.Time = begin.Add(timeout)
+		nRW       int       = 0
+		nExpected int       = len(buffer)
+		tRW       int       = 0
+		ok        bool
+		nErr      net.Error
+	)
 
-	for ls.nRW < ls.nExpected {
-		conn.SetWriteDeadline(ls.deadline)
-		ls.tRW, err = conn.Write(buffer[ls.nRW:])
+	for nRW < nExpected {
+		conn.SetWriteDeadline(deadline)
+		tRW, err = conn.Write(buffer[nRW:])
 		// have no error, add Read num
 		if err == nil {
-			ls.nRW += ls.tRW
+			nRW += tRW
 			continue
 		}
 		// timeout check
-		if ls.deadline.Sub(time.Now()).Nanoseconds() <= 0 {
-			return NewTimeoutError(conn, "write", ls.deadline.Sub(ls.begin), timeout)
+		if deadline.Sub(time.Now()).Nanoseconds() <= 0 {
+			return NewTimeoutError(conn, "write", deadline.Sub(begin), timeout)
 		}
 		// no net error, or no temporary error
-		if ls.nErr, ls.ok = err.(net.Error); !ls.ok || !ls.nErr.Temporary() {
+		if nErr, ok = err.(net.Error); !ok || !nErr.Temporary() {
 			return err
 		}
 		// temporary net error, will continue reading
 	}
 	return nil
-
 }
