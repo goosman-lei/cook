@@ -70,7 +70,7 @@ func (g *God) One(s *cook_sql.Statement) (interface{}, error) {
 	return m, nil
 }
 
-func (g *God) Multi(s *cook_sql.Statement) (interface{}, error) {
+func (g *God) Multi(s *cook_sql.Statement) ([]interface{}, error) {
 	var (
 		query     string
 		queryArgs cook_sql.SqlArgs
