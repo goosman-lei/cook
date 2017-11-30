@@ -32,10 +32,5 @@ func IsRegularFileExist(path string) bool {
 		return false
 	}
 
-	fm := fd.Mode()
-
-	if fm.IsRegular() {
-		return true
-	}
-	return false
+	return fd.Mode().IsRegular()
 }
