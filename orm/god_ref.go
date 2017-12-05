@@ -15,7 +15,12 @@ type Ref_Model struct {
 
 func NewRefModel(m interface{}) *Ref_Model {
 	model := &Ref_Model{}
-	model.R_Type = cook_util.TypeOf_Must_struct_ptr(m)
+	if r_model := reflect.TypeOf(m); r_model.Kind() == reflect.Ptr && r_model.Elem().Kind() == reflect.Struct && r_model.Elem().Implements(reflect.TypeOf((*Model)(nil)).Elem()) {
+		model.R_Type = r_model.Elem()
+	} else {
+		cook_util.Panicf("model must be ptr of struct. and must implement orm.Model")
+	}
+
 	model.Mapping_with_index = make(map[int]*Ref_Field)
 	model.Mapping_with_field = make(map[string]*Ref_Field)
 	model.Mapping_with_column = make(map[string]*Ref_Field)

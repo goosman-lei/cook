@@ -34,11 +34,11 @@ func (g *God) Loads(models []interface{}, pkvs ...interface{}) error {
 }
 
 func (g *God) Count() (int, error) {
-	m := NewModel()
+	m := g.NewModel()
 	if err := g.NewStatement().One(m, E_field("COUNT(*)").Alias("count")); err != nil {
 		return 0, err
 	} else {
-		return m.Int("count", 0), nil
+		return m.Int("count"), nil
 	}
 }
 

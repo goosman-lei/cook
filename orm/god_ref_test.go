@@ -6,6 +6,7 @@ import (
 )
 
 type M_User_GodRefTest struct {
+	*M       `orm:"nomapping"`
 	Id       int `orm:"pk"`
 	Name     string
 	Password string `orm:"col(passwd)"`
