@@ -1,9 +1,5 @@
 package orm
 
-import (
-	"errors"
-)
-
 const (
 	MAX_SQL_LEN = 16 * 1024
 )
