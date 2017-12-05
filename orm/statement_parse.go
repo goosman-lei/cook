@@ -60,7 +60,7 @@ func (s *Statement) parse_select() error {
 		}
 	}
 
-	s.Query = string(buf[:off])
+	s.SQL = string(buf[:off])
 	s.Args = args
 	return nil
 Failure:
@@ -108,7 +108,7 @@ func (s *Statement) parse_update() error {
 		}
 	}
 
-	s.Query = string(buf[:off])
+	s.SQL = string(buf[:off])
 	s.Args = args
 	return nil
 Failure:
@@ -131,7 +131,7 @@ func (s *Statement) parse_insert() error {
 		goto Failure
 	}
 
-	if s.InsertClause.values != nil {
+	if len(s.InsertClause.values) > 0 {
 		if len(s.InsertClause.cols) > 0 {
 			(buf)[off] = '('
 			off++
@@ -163,7 +163,7 @@ func (s *Statement) parse_insert() error {
 				goto Failure
 			}
 		}
-	} else if s.InsertClause.sets != nil {
+	} else if len(s.InsertClause.sets) > 0 {
 		off += copy(buf[off:], " SET ")
 		if err = multi_expr_to_string(s.InsertClause.sets, ", ", &args, &buf, &off); err != nil {
 			goto Failure
@@ -177,7 +177,7 @@ func (s *Statement) parse_insert() error {
 		}
 	}
 
-	s.Query = string(buf[:off])
+	s.SQL = string(buf[:off])
 	s.Args = args
 	return nil
 Failure:
@@ -220,7 +220,7 @@ func (s *Statement) parse_delete() error {
 		}
 	}
 
-	s.Query = string(buf[:off])
+	s.SQL = string(buf[:off])
 	s.Args = args
 	return nil
 Failure:

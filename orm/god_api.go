@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"errors"
 )
 
@@ -21,7 +22,7 @@ func (g *God) Load(model interface{}, pkv interface{}) error {
 /*
 Loads(&users, 1, 2, 3)
 */
-func (g *God) Loads(models []interface{}, pkvs ...interface{}) error {
+func (g *God) Loads(models interface{}, pkvs ...interface{}) error {
 	if len(g.Model.PK) != 1 {
 		return Err_invalid_pk_for_load
 	}
@@ -34,12 +35,7 @@ func (g *God) Loads(models []interface{}, pkvs ...interface{}) error {
 }
 
 func (g *God) Count() (int, error) {
-	m := g.NewModel()
-	if err := g.NewStatement().One(m, E_field("COUNT(*)").Alias("count")); err != nil {
-		return 0, err
-	} else {
-		return m.Int("count"), nil
-	}
+	return g.NewStatement().Count()
 }
 
 /*
@@ -168,4 +164,12 @@ Limit(20, 5)
 */
 func (g *God) Limit(args ...int) *Statement {
 	return g.NewStatement().Limit(args...)
+}
+
+func (g *God) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return g.NewStatement().Query(query, args...)
+}
+
+func (g *God) Exec(query string, args ...interface{}) (sql.Result, error) {
+	return g.NewStatement().Exec(query, args...)
 }

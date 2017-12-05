@@ -11,7 +11,8 @@ type God struct {
 	Table Table
 	Tpls  map[string][]*Expr
 
-	Silent bool // in silent mode, SQL will not execute. used for debug
+	LastStatement *Statement
+	Silent        bool
 }
 
 var (
@@ -40,6 +41,17 @@ func (g *God) NewStatement() *Statement {
 	}
 }
 
+func (g *God) args_to_field_exprs_with_tpl(args ...interface{}) []*Expr {
+	if len(args) == 0 {
+		return Exprs_star
+	}
+	if tpl, ok := args[0].(string); ok {
+		if v, ok := g.Tpls[tpl]; ok {
+			return v
+		}
+	}
+	return g.args_to_field_exprs(args...)
+}
 func (g *God) args_to_field_exprs(args ...interface{}) []*Expr {
 	if len(args) == 0 {
 		return Exprs_star
@@ -63,5 +75,7 @@ func (g *God) is_model(model interface{}) bool {
 }
 
 func (g *God) NewModel() Model {
-	return reflect.New(g.Model.R_Type).Interface().(Model)
+	m := reflect.New(g.Model.R_Type).Interface().(Model)
+	m.InitExtra()
+	return m
 }

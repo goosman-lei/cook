@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"reflect"
 )
 
@@ -13,7 +14,7 @@ type insert_clause struct {
 type Statement struct {
 	God *God
 
-	Query string
+	SQL   string
 	Args  SqlArgs
 	Error error
 
@@ -32,30 +33,44 @@ type Statement struct {
 	OndupClause   []*Expr
 }
 
+func (s *Statement) Count() (int, error) {
+	m := s.God.NewModel()
+	if err := s.One(m, E_field("COUNT(*)").Alias("count")); err != nil {
+		return 0, err
+	} else {
+		return m.Int("count"), nil
+	}
+}
+
 /*
 One(&user, "id", "name", E_field("age + 1").As("age"), E_field("status = 'del'").As("is_del"))
+One(&user, "tpl_simple")
 */
 func (s *Statement) One(model interface{}, args ...interface{}) error {
-	s.SelectClause = s.God.args_to_field_exprs(args...)
+	s.SelectClause = s.God.args_to_field_exprs_with_tpl(args...)
 	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
 	s.Limit(1)
 
 	if err := s.parse_select(); err != nil {
 		return err
 	}
+
+	s.Query(s.SQL, s.Args...)
 	return nil
 }
 
 /*
 Multi(&users, "id", "name", E_field("age + 1").As("age"), E_field("status = refused").As("is_del"))
+Multi(&users, "tpl_full")
 */
-func (s *Statement) Multi(models []interface{}, args ...interface{}) error {
-	s.SelectClause = s.God.args_to_field_exprs(args...)
+func (s *Statement) Multi(models interface{}, args ...interface{}) error {
+	s.SelectClause = s.God.args_to_field_exprs_with_tpl(args...)
 	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
 
 	if err := s.parse_select(); err != nil {
 		return err
 	}
+	s.Query(s.SQL, s.Args...)
 	return nil
 }
 
@@ -67,10 +82,10 @@ Update(E_assign("name", "Goosman-lei"), E_assign("age", 31))
 */
 func (s *Statement) Update(args ...interface{}) error {
 	on_exprs, set_exprs := s.God.parse_args_for_update(args...)
-	if on_exprs != nil {
+	if len(on_exprs) > 0 {
 		s.OnClause = on_exprs
 	}
-	if set_exprs != nil {
+	if len(set_exprs) > 0 {
 		s.UpdateClause = set_exprs
 	}
 	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
@@ -78,6 +93,7 @@ func (s *Statement) Update(args ...interface{}) error {
 	if err := s.parse_update(); err != nil {
 		return err
 	}
+	s.Exec(s.SQL, s.Args...)
 	return nil
 }
 
@@ -96,6 +112,7 @@ func (s *Statement) Delete(args ...interface{}) error {
 	if err := s.parse_delete(); err != nil {
 		return err
 	}
+	s.Exec(s.SQL, s.Args...)
 	return nil
 }
 
@@ -116,6 +133,7 @@ func (s *Statement) Insert(args ...interface{}) error {
 	if err := s.parse_insert(); err != nil {
 		return err
 	}
+	s.Exec(s.SQL, s.Args...)
 	return nil
 }
 
@@ -188,6 +206,22 @@ func (s *Statement) Limit(args ...int) *Statement {
 	return s
 }
 
+func (s *Statement) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	s.God.LastStatement = s
+	if s.God.Silent {
+		return nil, nil
+	}
+	return nil, nil
+}
+
+func (s *Statement) Exec(query string, args ...interface{}) (sql.Result, error) {
+	s.God.LastStatement = s
+	if s.God.Silent {
+		return nil, nil
+	}
+	return nil, nil
+}
+
 /*
 Delete(&user)
 	=> DELETE FROM <table> WHERE <pk_field_name_1> = <pk_field_val_1> AND <pk_field_name_2> = <pk_field_val_2>
@@ -209,18 +243,14 @@ func (g *God) parse_args_for_delete(args ...interface{}) []*Expr {
 		r_model := reflect.ValueOf(args[0]).Elem()
 		for _, pk := range g.Model.PK {
 			r_field := r_model.FieldByName(pk.R_StructField.Name)
-			// all pk column must not be nil
-			if r_field.IsNil() {
-				return Exprs_empty
-			}
-			exprs = append(exprs, E_eq(pk.R_StructField.Name, r_field.Interface()))
+			exprs = append(exprs, E_eq(pk.Column, r_field.Interface()))
 		}
 	} else if _, ok := args[0].(*Expr); !ok {
 		if len(g.Model.PK) != len(args) {
 			return Exprs_empty
 		}
 		for i, pk := range g.Model.PK {
-			exprs = append(exprs, E_eq(pk.R_StructField.Name, args[i]))
+			exprs = append(exprs, E_eq(pk.Column, args[i]))
 		}
 	} else {
 		for _, expr := range args {
@@ -235,6 +265,8 @@ func (g *God) parse_args_for_delete(args ...interface{}) []*Expr {
 /*
 Update(&user)
 	=> UPDATE <table> SET <non_nil_field_name_1> = <non_nil_field_val_1>, <non_nil_field_name_2> = <non_nil_field_val_2> .. WHERE <pk_field_name_1> = <pk_field_val_1> AND <pk_field_name_2> = <pk_field_val_2>
+Update(&user, []string{"name", "desc"})
+	=> UPDATE <table> SET <non_nil_field_name_1> = <non_nil_field_val_1>, <non_nil_field_name_2> = <non_nil_field_val_2> .. WHERE <pk_field_name_1> = <pk_field_val_1> AND <pk_field_name_2> = <pk_field_val_2>
 Update(E_assign("name", "Goosman-lei"), E_assign("age", 31))
 	=> UPDATE <table> SET name = 'Goosman-lei', age = 31
 */
@@ -245,30 +277,33 @@ func (g *God) parse_args_for_update(args ...interface{}) ([]*Expr, []*Expr) {
 
 	on_exprs := []*Expr{}
 	set_exprs := []*Expr{}
-	if len(args) == 1 && g.is_model(args[0]) {
+	if g.is_model(args[0]) {
+		cols_hints := map[string]bool{}
+		if v, ok := args[len(args)-1].([]string); ok {
+			for _, arg := range v {
+				cols_hints[arg] = true
+			}
+		}
 		r_model := reflect.ValueOf(args[0]).Elem()
+		pk_fields := map[string]bool{}
 		if len(g.Model.PK) > 0 {
 			for _, pk := range g.Model.PK {
 				r_field := r_model.FieldByName(pk.R_StructField.Name)
-				if r_field.IsNil() {
-					return Exprs_empty, Exprs_empty
-				}
-				on_exprs = append(on_exprs, E_eq(pk.R_StructField.Name, r_field.Interface()))
+				pk_fields[pk.R_StructField.Name] = true
+				on_exprs = append(on_exprs, E_eq(pk.Column, r_field.Interface()))
 			}
 		}
 		// extract pk information and buid on clause
 		for i := 0; i < r_model.NumField(); i++ {
-			if r_field := r_model.Field(i); !r_field.IsNil() {
-				if v, ok := g.Model.Mapping_with_index[i]; ok {
-					set_exprs = append(set_exprs, E_assign(v.Column, r_field.Interface()))
-				}
+			if v, ok := g.Model.Mapping_with_index[i]; ok && !pk_fields[r_model.Type().Field(i).Name] && (len(cols_hints) == 0 || cols_hints[v.Column]) {
+				set_exprs = append(set_exprs, E_assign(v.Column, r_model.Field(i).Interface()))
 			}
 		}
 		return on_exprs, set_exprs
 	}
 
 	for _, arg := range args {
-		if v, ok := arg.(*Expr); ok && v.op == OP_ASSIGN {
+		if v, ok := arg.(*Expr); ok {
 			set_exprs = append(set_exprs, v)
 		}
 	}
@@ -277,6 +312,8 @@ func (g *God) parse_args_for_update(args ...interface{}) ([]*Expr, []*Expr) {
 
 /*
 Insert(&user, &user, ...)
+	=> INSERT INTO <table> (non_nil_field_name...) VALUES(non_nil_field_val...), (non_nil_field_val...)...
+Insert(&user, &user, ..., []string{"name", "desc"})
 	=> INSERT INTO <table> (non_nil_field_name...) VALUES(non_nil_field_val...), (non_nil_field_val...)...
 Insert(E_assign("name", "Goosman-lei"), E_assign("age", 31))
 	=> INSERT INTO <table> SET name = 'Goosman-lei', age = 31
@@ -291,22 +328,27 @@ func (g *God) parse_args_for_insert(args ...interface{}) *insert_clause {
 	}
 
 	cols := []string{}
-	fields := []string{}
 	set_exprs := []*Expr{}
 	value_exprs := []*Expr{}
 	if g.is_model(args[0]) {
-		r_model := reflect.ValueOf(args[0]).Elem()
-		for i := 0; i < r_model.NumField(); i++ {
-			if v, ok := g.Model.Mapping_with_index[i]; ok && !r_model.Field(i).IsNil() {
-				cols = append(cols, v.Column)
-				fields = append(fields, v.R_StructField.Name)
+		cols_hints := map[string]bool{}
+		if v, ok := args[len(args)-1].([]string); ok {
+			args = args[:len(args)-1]
+			for _, arg := range v {
+				cols_hints[arg] = true
 			}
 		}
-		for _, arg := range args {
+
+		for idx, arg := range args {
 			r_model := reflect.ValueOf(arg).Elem()
 			vals := []interface{}{}
-			for _, field := range fields {
-				vals = append(vals, r_model.FieldByName(field).Interface())
+			for i := 0; i < r_model.NumField(); i++ {
+				if field, ok := g.Model.Mapping_with_index[i]; ok && (len(cols_hints) == 0 || cols_hints[field.Column]) {
+					if idx == 0 {
+						cols = append(cols, field.Column)
+					}
+					vals = append(vals, r_model.FieldByName(field.R_StructField.Name).Interface())
+				}
 			}
 			value_exprs = append(value_exprs, E_values(vals...))
 		}

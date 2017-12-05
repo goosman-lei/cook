@@ -5,6 +5,7 @@ import (
 )
 
 type Model interface {
+	InitExtra()
 	Extra(k string, v interface{})
 	Extras(map[string]interface{})
 	Interface(k string) interface{}
@@ -28,26 +29,30 @@ type M struct {
 	E map[string]interface{}
 }
 
-func (m *M) Extra(k string, v interface{}) {
+func (m M) InitExtra() {
+	m.E = make(map[string]interface{})
+}
+
+func (m M) Extra(k string, v interface{}) {
 	m.E[k] = v
 }
-func (m *M) Extras(datas map[string]interface{}) {
+func (m M) Extras(datas map[string]interface{}) {
 	for k, v := range datas {
 		m.E[k] = v
 	}
 }
-func (m *M) Exists(k string) bool {
+func (m M) Exists(k string) bool {
 	_, ok := m.E[k]
 	return ok
 }
-func (m *M) Interface(k string) interface{} {
+func (m M) Interface(k string) interface{} {
 	if v, ok := m.E[k]; ok {
 		return v
 	} else {
 		return nil
 	}
 }
-func (m *M) Bool(k string) bool {
+func (m M) Bool(k string) bool {
 	if e, ok := m.E[k]; !ok {
 		return false
 	} else {
@@ -85,7 +90,7 @@ func (m *M) Bool(k string) bool {
 		}
 	}
 }
-func (m *M) Int(k string) int {
+func (m M) Int(k string) int {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -131,7 +136,7 @@ func (m *M) Int(k string) int {
 		}
 	}
 }
-func (m *M) Int8(k string) int8 {
+func (m M) Int8(k string) int8 {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -177,7 +182,7 @@ func (m *M) Int8(k string) int8 {
 		}
 	}
 }
-func (m *M) Int16(k string) int16 {
+func (m M) Int16(k string) int16 {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -223,7 +228,7 @@ func (m *M) Int16(k string) int16 {
 		}
 	}
 }
-func (m *M) Int32(k string) int32 {
+func (m M) Int32(k string) int32 {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -269,7 +274,7 @@ func (m *M) Int32(k string) int32 {
 		}
 	}
 }
-func (m *M) Int64(k string) int64 {
+func (m M) Int64(k string) int64 {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -315,7 +320,7 @@ func (m *M) Int64(k string) int64 {
 		}
 	}
 }
-func (m *M) Uint(k string) uint {
+func (m M) Uint(k string) uint {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -361,7 +366,7 @@ func (m *M) Uint(k string) uint {
 		}
 	}
 }
-func (m *M) Uint8(k string) uint8 {
+func (m M) Uint8(k string) uint8 {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -407,7 +412,7 @@ func (m *M) Uint8(k string) uint8 {
 		}
 	}
 }
-func (m *M) Uint16(k string) uint16 {
+func (m M) Uint16(k string) uint16 {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -453,7 +458,7 @@ func (m *M) Uint16(k string) uint16 {
 		}
 	}
 }
-func (m *M) Uint32(k string) uint32 {
+func (m M) Uint32(k string) uint32 {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -499,7 +504,7 @@ func (m *M) Uint32(k string) uint32 {
 		}
 	}
 }
-func (m *M) Uint64(k string) uint64 {
+func (m M) Uint64(k string) uint64 {
 	if e, ok := m.E[k]; !ok {
 		return 0
 	} else {
@@ -545,7 +550,7 @@ func (m *M) Uint64(k string) uint64 {
 		}
 	}
 }
-func (m *M) Float32(k string) float32 {
+func (m M) Float32(k string) float32 {
 	if e, ok := m.E[k]; !ok {
 		return 0.0
 	} else {
@@ -591,7 +596,7 @@ func (m *M) Float32(k string) float32 {
 		}
 	}
 }
-func (m *M) Float64(k string) float64 {
+func (m M) Float64(k string) float64 {
 	if e, ok := m.E[k]; !ok {
 		return 0.0
 	} else {
@@ -637,7 +642,7 @@ func (m *M) Float64(k string) float64 {
 		}
 	}
 }
-func (m *M) String(k string) string {
+func (m M) String(k string) string {
 	if e, ok := m.E[k]; !ok {
 		return ""
 	} else {
