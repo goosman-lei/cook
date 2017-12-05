@@ -116,6 +116,6 @@ func tag_handler_col(f *Ref_Field, t *Ref_Tag) {
 	}
 }
 
-func tag_handler_col(f *Ref_Field, t *Ref_Tag) {
+func tag_handler_nomapping(f *Ref_Field, t *Ref_Tag) {
 	f.NoMapping = true
 }

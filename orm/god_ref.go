@@ -16,7 +16,7 @@ type Ref_Model struct {
 func NewRefModel(m interface{}) *Ref_Model {
 	model := &Ref_Model{}
 	model.R_Type = cook_util.TypeOf_Must_struct_ptr(m)
-	model.Mapping_with_index = make(map[string]*Ref_Field)
+	model.Mapping_with_index = make(map[int]*Ref_Field)
 	model.Mapping_with_field = make(map[string]*Ref_Field)
 	model.Mapping_with_column = make(map[string]*Ref_Field)
 
