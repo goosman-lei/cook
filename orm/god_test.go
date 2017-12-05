@@ -1,7 +1,6 @@
 package orm
 
 import (
-	"gitlab.niceprivate.com/golang/cook/orm/table"
 	"testing"
 )
 
@@ -13,7 +12,7 @@ type M_User_GodTest struct {
 }
 
 func Test_Tpl(t *testing.T) {
-	GodOf_User := NewGod((*M_User_GodTest)(nil), "default", table.Table_normal("kk_user"))
+	GodOf_User := NewGod((*M_User_GodTest)(nil), "default", Table_normal("kk_user"))
 	GodOf_User.Tpl("simple", "id", "name")
 	GodOf_User.Tpl("full", "id", "name", "passwd", E_field("name").Alias("nick_name"))
 

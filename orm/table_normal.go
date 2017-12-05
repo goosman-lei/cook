@@ -1,4 +1,4 @@
-package table
+package orm
 
 type table_normal struct {
 	Nam string

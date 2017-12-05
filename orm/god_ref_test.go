@@ -1,7 +1,6 @@
 package orm
 
 import (
-	"gitlab.niceprivate.com/golang/cook/orm/table"
 	"testing"
 )
 
@@ -13,7 +12,7 @@ type M_User_GodRefTest struct {
 }
 
 func Test_God_Ref(t *testing.T) {
-	GodOf_User := NewGod((*M_User_GodRefTest)(nil), "default", table.Table_normal("kk_user"))
+	GodOf_User := NewGod((*M_User_GodRefTest)(nil), "default", Table_normal("kk_user"))
 
 	if GodOf_User.Model == nil {
 		t.Logf("model reflect failed")

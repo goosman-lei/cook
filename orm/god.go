@@ -1,7 +1,6 @@
 package orm
 
 import (
-	"gitlab.niceprivate.com/golang/cook/orm/table"
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"reflect"
 )
@@ -9,7 +8,7 @@ import (
 type God struct {
 	Model *Ref_Model
 	Node  string
-	Table table.Table
+	Table Table
 	Tpls  map[string][]*Expr
 
 	Silent bool // in silent mode, SQL will not execute. used for debug
@@ -21,7 +20,7 @@ var (
 	Exprs_empty = []*Expr{}
 )
 
-func NewGod(model interface{}, node string, table table.Table) *God {
+func NewGod(model interface{}, node string, table Table) *God {
 	return &God{
 		Model:  NewRefModel(model),
 		Node:   node,
