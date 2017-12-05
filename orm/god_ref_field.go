@@ -22,20 +22,23 @@ type Ref_Field struct {
 	Model         *Ref_Model
 	R_StructField reflect.StructField
 	Column        string
+	NoMapping     bool
 	Tags          map[string]*Ref_Tag
 }
 
 var (
 	pattern_func        *regexp.Regexp                        = regexp.MustCompile("^(\\w+)\\(?(.*?)\\)?$")
 	tag_handler_mapping map[string]func(*Ref_Field, *Ref_Tag) = map[string]func(*Ref_Field, *Ref_Tag){
-		"pk":  tag_handler_pk,
-		"col": tag_handler_col,
+		"pk":        tag_handler_pk,
+		"col":       tag_handler_col,
+		"nomapping": tag_handler_nomapping,
 	}
 )
 
 func NewRefField(model *Ref_Model, idx int) *Ref_Field {
 	field := &Ref_Field{}
 	field.Model = model
+	field.NoMapping = false
 	field.R_StructField = model.R_Type.Field(idx)
 	field.apply_tags()
 	return field
@@ -111,4 +114,8 @@ func tag_handler_col(f *Ref_Field, t *Ref_Tag) {
 	} else {
 		f.Column = cook_util.Hump_to_underline(f.R_StructField.Name)
 	}
+}
+
+func tag_handler_col(f *Ref_Field, t *Ref_Tag) {
+	f.NoMapping = true
 }

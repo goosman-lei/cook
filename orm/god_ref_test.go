@@ -1,18 +1,18 @@
 package orm
 
 import (
-	"gitlab.niceprivate.com/golang/cook/orm-ng/table"
+	"gitlab.niceprivate.com/golang/cook/orm/table"
 	"testing"
 )
 
-type M_User struct {
+type M_User_GodRefTest struct {
 	Id       int `orm:"pk"`
 	Name     string
 	Password string `orm:"col(passwd)"`
 }
 
-func Test_Load(t *testing.T) {
-	GodOf_User := NewGod(&M_User{}, "default", table.Table_normal("kk_user"))
+func Test_God_Ref(t *testing.T) {
+	GodOf_User := NewGod((*M_User_GodRefTest)(nil), "default", table.Table_normal("kk_user"))
 
 	if GodOf_User.Model == nil {
 		t.Logf("model reflect failed")
@@ -24,22 +24,23 @@ func Test_Load(t *testing.T) {
 		t.Fail()
 	}
 
-	if len(GodOf_User.Model.Fields) != 3 {
-		t.Logf("Fields reflect failed")
+	if len(GodOf_User.Model.Mapping_with_field) != 3 {
+		t.Logf("Mapping_with_field reflect failed")
 		t.Fail()
 	}
 
-	fields := GodOf_User.Model.Fields
-	if fields[0].R_StructField.Name != "Id" || fields[0].Column != "id" {
-		t.Logf("Fields reflect failed")
+	mapping_field := GodOf_User.Model.Mapping_with_field
+	mapping_column := GodOf_User.Model.Mapping_with_column
+	if mapping_field["Id"].Column != "id" || mapping_column["id"].R_StructField.Name != "Id" {
+		t.Logf("mapping reflect failed")
 		t.Fail()
 	}
-	if fields[1].R_StructField.Name != "Name" || fields[1].Column != "name" {
-		t.Logf("Fields reflect failed")
+	if mapping_field["Name"].Column != "name" || mapping_column["name"].R_StructField.Name != "Name" {
+		t.Logf("mapping reflect failed")
 		t.Fail()
 	}
-	if fields[2].R_StructField.Name != "Password" || fields[2].Column != "passwd" {
-		t.Logf("Fields reflect failed")
+	if mapping_field["Password"].Column != "passwd" || mapping_column["passwd"].R_StructField.Name != "Password" {
+		t.Logf("mapping reflect failed")
 		t.Fail()
 	}
 }
