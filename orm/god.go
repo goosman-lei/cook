@@ -32,7 +32,7 @@ func NewGod(factory func() Model, node string, table Table) *God {
 	}
 }
 
-func NewGod_master_slave(factory func() Model, master_node string, slave_node, table Table) *God {
+func NewGod_master_slave(factory func() Model, master_node string, slave_node string, table Table) *God {
 	return &God{
 		Model:      NewRefModel(factory()),
 		Factory:    factory,
@@ -51,6 +51,17 @@ func (g *God) NewStatement() *Statement {
 	return &Statement{
 		God: g,
 	}
+}
+
+func (g *God) Sharding(datas ...interface{}) []*Statement {
+	statements := []*Statement{}
+	for table_name, sharding_data := range Names(g.Table, datas...) {
+		statement := g.NewStatement()
+		statement.TableClause = []*Expr{E_table(table_name)}
+		statement.ShardingData = sharding_data
+		statements = append(statements, statement)
+	}
+	return statements
 }
 
 func (g *God) args_to_field_exprs_with_tpl(args ...interface{}) []*Expr {

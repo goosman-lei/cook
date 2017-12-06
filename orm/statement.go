@@ -23,7 +23,8 @@ type Statement struct {
 	DeleteClause []*Expr
 	InsertClause *insert_clause
 
-	TableClause []*Expr
+	TableClause  []*Expr
+	ShardingData [][]interface{}
 
 	OnClause      []*Expr
 	GroupbyClause []*Expr
@@ -49,7 +50,9 @@ One(&user, "tpl_simple")
 */
 func (s *Statement) One(args ...interface{}) (Model, error) {
 	s.SelectClause = s.God.args_to_field_exprs_with_tpl(args...)
-	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	if len(s.TableClause) == 0 {
+		s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	}
 	s.Limit(1)
 
 	if err := s.parse_select(); err != nil {
@@ -70,7 +73,9 @@ Multi(&users, "tpl_full")
 */
 func (s *Statement) Multi(args ...interface{}) ([]Model, error) {
 	s.SelectClause = s.God.args_to_field_exprs_with_tpl(args...)
-	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	if len(s.TableClause) == 0 {
+		s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	}
 
 	if err := s.parse_select(); err != nil {
 		return nil, err
@@ -96,7 +101,9 @@ func (s *Statement) Update(args ...interface{}) (int, error) {
 	if len(set_exprs) > 0 {
 		s.UpdateClause = set_exprs
 	}
-	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	if len(s.TableClause) == 0 {
+		s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	}
 
 	if err := s.parse_update(); err != nil {
 		return 0, err
@@ -119,7 +126,9 @@ Delete(E_eq("name", "Goosman-lei"), E_le("age", 100))
 */
 func (s *Statement) Delete(args ...interface{}) (int, error) {
 	s.DeleteClause = s.God.parse_args_for_delete(args...)
-	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	if len(s.TableClause) == 0 {
+		s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	}
 
 	if err := s.parse_delete(); err != nil {
 		return 0, err
@@ -144,7 +153,9 @@ Insert(E_fields("name", "age"), E_values("Goosman-lei", 31), E_values("Jacky", 2
 */
 func (s *Statement) Insert(args ...interface{}) (int, error) {
 	s.InsertClause = s.God.parse_args_for_insert(args...)
-	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	if len(s.TableClause) == 0 {
+		s.TableClause = []*Expr{E_table(s.God.Table.Name())}
+	}
 
 	if err := s.parse_insert(); err != nil {
 		return 0, err
