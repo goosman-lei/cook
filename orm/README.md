@@ -97,7 +97,7 @@ user = M_User{
 affnum, err := GodOf_User.Update(&user)
 
 // insert
-affnum, err := GodOf_User.Insert(&user)
+last_id, err := GodOf_User.Insert(&user)
 
 affnum, err := GodOf_User.Delete(&user)
 affnum, err := GodOf_User.Delete(1)
