@@ -25,3 +25,12 @@ func OpenFileWithMkdir(path string, flag int, perm os.FileMode) (*os.File, error
 
 	return os.OpenFile(path, flag, perm)
 }
+
+func IsRegularFileExist(path string) bool {
+	fd, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+
+	return fd.Mode().IsRegular()
+}
