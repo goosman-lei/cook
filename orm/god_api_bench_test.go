@@ -5,7 +5,7 @@ import (
 )
 
 type M_User_GodApiBenchmark struct {
-	M        `orm:"nomapping"`
+	*M       `orm:"nomapping"`
 	Id       int `orm:"pk"`
 	Name     string
 	Password string `orm:"col(passwd)"`
@@ -16,12 +16,15 @@ type M_User_GodApiBenchmark struct {
 	Sex      string
 }
 
+func F_User_GodApiBenchmark() Model {
+	return &M_User_GodApiBenchmark{}
+}
+
 var (
-	GodOf_User_ApiBenchmark *God = NewGod((*M_User_GodApiBenchmark)(nil), "default", Table_normal("kk_user"))
+	GodOf_User_ApiBenchmark *God = NewGod(F_User_GodApiBenchmark, "default", Table_normal("kk_user"))
 )
 
 func init() {
-	GodOf_User_ApiBenchmark.Silent = true
 }
 
 /*

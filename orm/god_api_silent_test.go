@@ -5,7 +5,7 @@ import (
 )
 
 type M_User_GodApiTest struct {
-	M        `orm:"nomapping"`
+	*M       `orm:"nomapping"`
 	Id       int `orm:"pk"`
 	Name     string
 	Password string `orm:"col(passwd)"`
@@ -16,24 +16,22 @@ type M_User_GodApiTest struct {
 	Sex      string
 }
 
+func F_User_GodApiTest() Model {
+	return &M_User_GodApiTest{}
+}
+
 var (
-	GodOf_User_ApiTest *God = NewGod((*M_User_GodApiTest)(nil), "default", Table_normal("kk_user"))
+	GodOf_User_ApiTest *God = NewGod(F_User_GodApiTest, "default", Table_normal("kk_user"))
 )
 
 func init() {
-	GodOf_User_ApiTest.Silent = true
 }
 
 func Test_God_Load(t *testing.T) {
-	var (
-		user  M_User_GodApiTest
-		muser []*M_User_GodApiTest
-	)
-
-	GodOf_User_ApiTest.Load(&user, 1)
+	GodOf_User_ApiTest.Load(1)
 	want_sql_and_args(t, "SELECT * FROM kk_user WHERE id = ? LIMIT ?", 1, 1)
 
-	GodOf_User_ApiTest.Loads(muser, 1, 2, 3)
+	GodOf_User_ApiTest.Loads(1, 2, 3)
 	want_sql_and_args(t, "SELECT * FROM kk_user WHERE id IN(?, ?, ?)", 1, 2, 3)
 }
 
@@ -46,22 +44,18 @@ func Test_God_Count(t *testing.T) {
 }
 
 func Test_God_One(t *testing.T) {
-	var user M_User_GodApiTest
-
-	GodOf_User_ApiTest.One(&user, "id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
+	GodOf_User_ApiTest.One("id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
 	want_sql_and_args(t, "SELECT id, name, unix_timestamp() - add_time AS reg_secs FROM kk_user LIMIT ?", 1)
 
-	GodOf_User_ApiTest.On(E_eq("name", "Goosman-lei")).One(&user, "id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
+	GodOf_User_ApiTest.On(E_eq("name", "Goosman-lei")).One("id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
 	want_sql_and_args(t, "SELECT id, name, unix_timestamp() - add_time AS reg_secs FROM kk_user WHERE name = ? LIMIT ?", "Goosman-lei", 1)
 
-	GodOf_User_ApiTest.On(E_eq("sex", "male")).Groupby("age").Having(E_gt("add_time", 0)).Orderby(E_desc("id")).One(&user, "id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
+	GodOf_User_ApiTest.On(E_eq("sex", "male")).Groupby("age").Having(E_gt("add_time", 0)).Orderby(E_desc("id")).One("id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
 	want_sql_and_args(t, "SELECT id, name, unix_timestamp() - add_time AS reg_secs FROM kk_user WHERE sex = ? GROUP BY age HAVING add_time > ? ORDER BY id DESC LIMIT ?", "male", 0, 1)
 }
 
 func Test_God_Multi(t *testing.T) {
-	var users []*M_User_GodApiTest
-
-	GodOf_User_ApiTest.On(E_eq("sex", "male")).Groupby("age").Having(E_gt("add_time", 0)).Orderby(E_desc("id")).Limit(10, 20).Multi(&users, "id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
+	GodOf_User_ApiTest.On(E_eq("sex", "male")).Groupby("age").Having(E_gt("add_time", 0)).Orderby(E_desc("id")).Limit(10, 20).Multi("id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
 	want_sql_and_args(t, "SELECT id, name, unix_timestamp() - add_time AS reg_secs FROM kk_user WHERE sex = ? GROUP BY age HAVING add_time > ? ORDER BY id DESC LIMIT ? OFFSET ?", "male", 0, 10, 20)
 }
 

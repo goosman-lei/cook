@@ -11,8 +11,12 @@ type M_User_GodRefTest struct {
 	Password string `orm:"col(passwd)"`
 }
 
+func F_User_GodRefTest() Model {
+	return &M_User_GodRefTest{}
+}
+
 func Test_God_Ref(t *testing.T) {
-	GodOf_User := NewGod((*M_User_GodRefTest)(nil), "default", Table_normal("kk_user"))
+	GodOf_User := NewGod(F_User_GodRefTest, "default", Table_normal("kk_user"))
 
 	if GodOf_User.Model == nil {
 		t.Logf("model reflect failed")

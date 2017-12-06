@@ -11,8 +11,12 @@ type M_User_GodTest struct {
 	Password string `orm:"col(passwd)"`
 }
 
+func F_User_GodTest() Model {
+	return &M_User_GodTest{}
+}
+
 func Test_Tpl(t *testing.T) {
-	GodOf_User := NewGod((*M_User_GodTest)(nil), "default", Table_normal("kk_user"))
+	GodOf_User := NewGod(F_User_GodTest, "default", Table_normal("kk_user"))
 	GodOf_User.Tpl("simple", "id", "name")
 	GodOf_User.Tpl("full", "id", "name", "passwd", E_field("name").Alias("nick_name"))
 

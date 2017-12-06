@@ -2,17 +2,16 @@ package orm
 
 import (
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
-	"reflect"
 )
 
 type God struct {
-	Model *Ref_Model
-	Node  string
-	Table Table
-	Tpls  map[string][]*Expr
+	Model   *Ref_Model
+	Factory func() Model
+	Node    string
+	Table   Table
+	Tpls    map[string][]*Expr
 
 	LastStatement *Statement
-	Silent        bool
 }
 
 var (
@@ -21,13 +20,13 @@ var (
 	Exprs_empty = []*Expr{}
 )
 
-func NewGod(model interface{}, node string, table Table) *God {
+func NewGod(factory func() Model, node string, table Table) *God {
 	return &God{
-		Model:  NewRefModel(model),
-		Node:   node,
-		Table:  table,
-		Tpls:   make(map[string][]*Expr),
-		Silent: false,
+		Model:   NewRefModel(factory()),
+		Factory: factory,
+		Node:    node,
+		Table:   table,
+		Tpls:    make(map[string][]*Expr),
 	}
 }
 
@@ -68,14 +67,4 @@ func (g *God) args_to_field_exprs(args ...interface{}) []*Expr {
 		}
 	}
 	return exprs
-}
-
-func (g *God) is_model(model interface{}) bool {
-	return reflect.TypeOf(model).Kind() == reflect.Ptr && reflect.TypeOf(model).Elem() == g.Model.R_Type
-}
-
-func (g *God) NewModel() Model {
-	m := reflect.New(g.Model.R_Type).Interface().(Model)
-	m.InitExtra()
-	return m
 }

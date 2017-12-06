@@ -12,26 +12,26 @@ var (
 /*
 Load(&user, 1)
 */
-func (g *God) Load(model interface{}, pkv interface{}) error {
+func (g *God) Load(pkv interface{}) (Model, error) {
 	if len(g.Model.PK) != 1 {
-		return Err_invalid_pk_for_load
+		return nil, Err_invalid_pk_for_load
 	}
-	return g.NewStatement().On(E_eq(g.Model.PK[0].Column, pkv)).One(model)
+	return g.NewStatement().On(E_eq(g.Model.PK[0].Column, pkv)).One()
 }
 
 /*
 Loads(&users, 1, 2, 3)
 */
-func (g *God) Loads(models interface{}, pkvs ...interface{}) error {
+func (g *God) Loads(pkvs ...interface{}) ([]Model, error) {
 	if len(g.Model.PK) != 1 {
-		return Err_invalid_pk_for_load
+		return nil, Err_invalid_pk_for_load
 	}
 
 	if len(pkvs) < 1 {
-		return nil
+		return []Model{}, nil
 	}
 
-	return g.NewStatement().On(E_in(g.Model.PK[0].Column, pkvs)).Multi(models)
+	return g.NewStatement().On(E_in(g.Model.PK[0].Column, pkvs)).Multi()
 }
 
 func (g *God) Count() (int, error) {
@@ -49,8 +49,8 @@ Having
 Orderby
 Limit
 */
-func (g *God) One(model interface{}, args ...interface{}) error {
-	return g.NewStatement().One(model, args...)
+func (g *God) One(args ...interface{}) (Model, error) {
+	return g.NewStatement().One(args...)
 }
 
 /*
@@ -64,8 +64,8 @@ Having
 Orderby
 Limit
 */
-func (g *God) Multi(model []interface{}, args ...interface{}) error {
-	return g.NewStatement().Multi(model, args...)
+func (g *God) Multi(args ...interface{}) ([]Model, error) {
+	return g.NewStatement().Multi(args...)
 }
 
 /*

@@ -34,8 +34,7 @@ type Statement struct {
 }
 
 func (s *Statement) Count() (int, error) {
-	m := s.God.NewModel()
-	if err := s.One(m, E_field("COUNT(*)").Alias("count")); err != nil {
+	if m, err := s.One(E_field("COUNT(*)").Alias("count")); err != nil {
 		return 0, err
 	} else {
 		return m.Int("count"), nil
@@ -46,32 +45,39 @@ func (s *Statement) Count() (int, error) {
 One(&user, "id", "name", E_field("age + 1").As("age"), E_field("status = 'del'").As("is_del"))
 One(&user, "tpl_simple")
 */
-func (s *Statement) One(model interface{}, args ...interface{}) error {
+func (s *Statement) One(args ...interface{}) (Model, error) {
 	s.SelectClause = s.God.args_to_field_exprs_with_tpl(args...)
 	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
 	s.Limit(1)
 
 	if err := s.parse_select(); err != nil {
-		return err
+		return nil, err
 	}
 
-	s.Query(s.SQL, s.Args...)
-	return nil
+	rows, err := s.Query(s.SQL, s.Args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.God.rows_to_model(rows)
 }
 
 /*
 Multi(&users, "id", "name", E_field("age + 1").As("age"), E_field("status = refused").As("is_del"))
 Multi(&users, "tpl_full")
 */
-func (s *Statement) Multi(models interface{}, args ...interface{}) error {
+func (s *Statement) Multi(args ...interface{}) ([]Model, error) {
 	s.SelectClause = s.God.args_to_field_exprs_with_tpl(args...)
 	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
 
 	if err := s.parse_select(); err != nil {
-		return err
+		return nil, err
 	}
-	s.Query(s.SQL, s.Args...)
-	return nil
+	rows, err := s.Query(s.SQL, s.Args...)
+	if err != nil {
+		return nil, err
+	}
+	return s.God.rows_to_models(rows)
 }
 
 /*
@@ -208,18 +214,12 @@ func (s *Statement) Limit(args ...int) *Statement {
 
 func (s *Statement) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	s.God.LastStatement = s
-	if s.God.Silent {
-		return nil, nil
-	}
-	return nil, nil
+	return s.God.query(query, args...)
 }
 
 func (s *Statement) Exec(query string, args ...interface{}) (sql.Result, error) {
 	s.God.LastStatement = s
-	if s.God.Silent {
-		return nil, nil
-	}
-	return nil, nil
+	return s.God.exec(query, args...)
 }
 
 /*
