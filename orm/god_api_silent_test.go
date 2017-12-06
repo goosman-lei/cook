@@ -25,6 +25,7 @@ var (
 )
 
 func init() {
+	GodOf_User_ApiTest.Tpl("simple", "id", "name")
 }
 
 func Test_God_Load(t *testing.T) {
@@ -44,6 +45,9 @@ func Test_God_Count(t *testing.T) {
 }
 
 func Test_God_One(t *testing.T) {
+	GodOf_User_ApiTest.One("simple")
+	want_sql_and_args(t, "SELECT id, name FROM kk_user LIMIT ?", 1)
+
 	GodOf_User_ApiTest.One("id", "name", E_literal("unix_timestamp() - add_time AS reg_secs"))
 	want_sql_and_args(t, "SELECT id, name, unix_timestamp() - add_time AS reg_secs FROM kk_user LIMIT ?", 1)
 
