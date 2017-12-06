@@ -5,11 +5,12 @@ import (
 )
 
 type God struct {
-	Model   *Ref_Model
-	Factory func() Model
-	Node    string
-	Table   Table
-	Tpls    map[string][]*Expr
+	Model      *Ref_Model
+	Factory    func() Model
+	MasterNode string
+	SlaveNode  string
+	Table      Table
+	Tpls       map[string][]*Expr
 
 	LastStatement *Statement
 }
@@ -22,11 +23,23 @@ var (
 
 func NewGod(factory func() Model, node string, table Table) *God {
 	return &God{
-		Model:   NewRefModel(factory()),
-		Factory: factory,
-		Node:    node,
-		Table:   table,
-		Tpls:    make(map[string][]*Expr),
+		Model:      NewRefModel(factory()),
+		Factory:    factory,
+		MasterNode: node,
+		SlaveNode:  node,
+		Table:      table,
+		Tpls:       make(map[string][]*Expr),
+	}
+}
+
+func NewGod_master_slave(factory func() Model, master_node string, slave_node, table Table) *God {
+	return &God{
+		Model:      NewRefModel(factory()),
+		Factory:    factory,
+		MasterNode: master_node,
+		SlaveNode:  slave_node,
+		Table:      table,
+		Tpls:       make(map[string][]*Expr),
 	}
 }
 
