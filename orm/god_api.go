@@ -79,7 +79,7 @@ On
 Orderby
 Limit
 */
-func (g *God) Update(args ...interface{}) error {
+func (g *God) Update(args ...interface{}) (int, error) {
 	return g.NewStatement().Update(args...)
 }
 
@@ -96,7 +96,7 @@ Insert(E_fields("name", "age"), E_values("Goosman-lei", 31), E_values("Jacky", 2
 Available Decorator:
 Ondup
 */
-func (g *God) Insert(args ...interface{}) error {
+func (g *God) Insert(args ...interface{}) (int, error) {
 	return g.NewStatement().Insert(args...)
 }
 
@@ -112,7 +112,7 @@ Available Decorator:
 Orderby
 Limit
 */
-func (g *God) Delete(args ...interface{}) error {
+func (g *God) Delete(args ...interface{}) (int, error) {
 	return g.NewStatement().Delete(args...)
 }
 

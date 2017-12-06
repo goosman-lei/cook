@@ -64,7 +64,7 @@ var (
 func init() {
 	cook_conn.SetupMysql(map[string]cook_conn.MysqlConf{
 		"default": cook_conn.MysqlConf{
-			Addr:     "bdb.slave.kkgoo.niceprivate.com:3306",
+			Addr:     "127.0.0.1:3306",
 			Username: "nice",
 			Password: "Cb84eZaa229ddnm",
 			Database: "kkgoo",

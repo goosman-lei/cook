@@ -16,7 +16,7 @@ func F_User_GodRefTest() Model {
 }
 
 func Test_God_Ref(t *testing.T) {
-	GodOf_User := NewGod(F_User_GodRefTest, "default", Table_normal("kk_user"))
+	GodOf_User := NewGod(F_User_GodRefTest, "not-exists-node", Table_normal("kk_user"))
 
 	if GodOf_User.Model == nil {
 		t.Logf("model reflect failed")

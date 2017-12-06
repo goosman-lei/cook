@@ -21,7 +21,7 @@ func F_User_GodApiTest() Model {
 }
 
 var (
-	GodOf_User_ApiTest *God = NewGod(F_User_GodApiTest, "default", Table_normal("kk_user"))
+	GodOf_User_ApiTest *God = NewGod(F_User_GodApiTest, "not-exists-node", Table_normal("kk_user"))
 )
 
 func init() {

@@ -36,8 +36,10 @@ type Statement struct {
 func (s *Statement) Count() (int, error) {
 	if m, err := s.One(E_field("COUNT(*)").Alias("count")); err != nil {
 		return 0, err
-	} else {
+	} else if m != nil {
 		return m.Int("count"), nil
+	} else {
+		return 0, nil
 	}
 }
 
@@ -86,7 +88,7 @@ Update(&user)
 Update(E_assign("name", "Goosman-lei"), E_assign("age", 31))
 	=> UPDATE <table> SET name = 'Goosman-lei', age = 31
 */
-func (s *Statement) Update(args ...interface{}) error {
+func (s *Statement) Update(args ...interface{}) (int, error) {
 	on_exprs, set_exprs := s.God.parse_args_for_update(args...)
 	if len(on_exprs) > 0 {
 		s.OnClause = on_exprs
@@ -97,10 +99,14 @@ func (s *Statement) Update(args ...interface{}) error {
 	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
 
 	if err := s.parse_update(); err != nil {
-		return err
+		return 0, err
+	} else if r, err := s.Exec(s.SQL, s.Args...); err != nil {
+		return 0, err
+	} else if cnt, err := r.RowsAffected(); err != nil {
+		return 0, err
+	} else {
+		return int(cnt), nil
 	}
-	s.Exec(s.SQL, s.Args...)
-	return nil
 }
 
 /*
@@ -111,15 +117,19 @@ Delete(pk...)
 Delete(E_eq("name", "Goosman-lei"), E_le("age", 100))
 	=> DELETE FROM <table> WHERE name = 'Goosman-lei' AND age < 100
 */
-func (s *Statement) Delete(args ...interface{}) error {
+func (s *Statement) Delete(args ...interface{}) (int, error) {
 	s.DeleteClause = s.God.parse_args_for_delete(args...)
 	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
 
 	if err := s.parse_delete(); err != nil {
-		return err
+		return 0, err
+	} else if r, err := s.Exec(s.SQL, s.Args...); err != nil {
+		return 0, err
+	} else if cnt, err := r.RowsAffected(); err != nil {
+		return 0, err
+	} else {
+		return int(cnt), nil
 	}
-	s.Exec(s.SQL, s.Args...)
-	return nil
 }
 
 /*
@@ -132,15 +142,19 @@ Insert(E_values("Goosman-lei", 31), E_values("Jacky", 28))
 Insert(E_fields("name", "age"), E_values("Goosman-lei", 31), E_values("Jacky", 28))
 	=> INSERT INTO <table> (name, age) VALUES("Goosman-lei", 31), ("Jacky", 28)
 */
-func (s *Statement) Insert(args ...interface{}) error {
+func (s *Statement) Insert(args ...interface{}) (int, error) {
 	s.InsertClause = s.God.parse_args_for_insert(args...)
 	s.TableClause = []*Expr{E_table(s.God.Table.Name())}
 
 	if err := s.parse_insert(); err != nil {
-		return err
+		return 0, err
+	} else if r, err := s.Exec(s.SQL, s.Args...); err != nil {
+		return 0, err
+	} else if last_id, err := r.LastInsertId(); err != nil {
+		return 0, err
+	} else {
+		return int(last_id), nil
 	}
-	s.Exec(s.SQL, s.Args...)
-	return nil
 }
 
 /*

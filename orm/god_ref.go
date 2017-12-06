@@ -65,6 +65,9 @@ func (g *God) is_model(model interface{}) bool {
 }
 
 func (g *God) rows_to_model(rows *sql.Rows) (Model, error) {
+	if rows == nil {
+		return nil, nil
+	}
 	defer rows.Close()
 
 	cols, err := rows.Columns()
@@ -99,6 +102,9 @@ func (g *God) rows_to_model(rows *sql.Rows) (Model, error) {
 	return model, nil
 }
 func (g *God) rows_to_models(rows *sql.Rows) ([]Model, error) {
+	if rows == nil {
+		return nil, nil
+	}
 	defer rows.Close()
 
 	cols, err := rows.Columns()

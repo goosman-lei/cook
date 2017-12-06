@@ -21,7 +21,7 @@ func F_User_GodApiBenchmark() Model {
 }
 
 var (
-	GodOf_User_ApiBenchmark *God = NewGod(F_User_GodApiBenchmark, "default", Table_normal("kk_user"))
+	GodOf_User_ApiBenchmark *God = NewGod(F_User_GodApiBenchmark, "not-exists-node", Table_normal("kk_user"))
 )
 
 func init() {
