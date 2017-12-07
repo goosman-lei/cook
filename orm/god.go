@@ -53,15 +53,21 @@ func (g *God) NewStatement() *Statement {
 	}
 }
 
-func (g *God) Sharding(datas ...interface{}) []*Statement {
-	statements := []*Statement{}
+func (g *God) Sharding(datas ...interface{}) *Statement {
+	stmt := g.NewStatement()
+	stmt.TableClause = []*Expr{E_table(g.Table.Name(datas...))}
+	return stmt
+}
+
+func (g *God) Shardings(datas ...interface{}) []*Statement {
+	stmts := []*Statement{}
 	for table_name, sharding_data := range Names(g.Table, datas...) {
-		statement := g.NewStatement()
-		statement.TableClause = []*Expr{E_table(table_name)}
-		statement.ShardingData = sharding_data
-		statements = append(statements, statement)
+		stmt := g.NewStatement()
+		stmt.TableClause = []*Expr{E_table(table_name)}
+		stmt.ShardingData = sharding_data
+		stmts = append(stmts, stmt)
 	}
-	return statements
+	return stmts
 }
 
 func (g *God) args_to_field_exprs_with_tpl(args ...interface{}) []*Expr {

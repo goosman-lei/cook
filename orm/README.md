@@ -156,7 +156,8 @@ type God struct{ ... }
     func (g *God) One(args ...interface{}) (Model, error)
     func (g *God) Orderby(args ...interface{}) *Statement
     func (g *God) Query(query string, args ...interface{}) (*sql.Rows, error)
-    func (g *God) Sharding(datas ...interface{}) []*Statement
+    func (g *God) Sharding(datas ...interface{}) *Statement     // 单分表决策数据分表语句获取
+    func (g *God) Shardings(datas ...interface{}) []*Statement  // 多分表决策数据分表语句获取
     func (g *God) Tpl(tpl string, fields ...interface{}) // 定义查询模板
     func (g *God) Update(args ...interface{}) (int, error)
 
@@ -211,10 +212,24 @@ GodOf_User.On(E_eq("id", 1)).One("simple")
 
 *核心思想*: 将分表规则应用到数据中, 产生独立的语句和分片数据对, 然后交由应用处理
 
+#### 单分表决策数据
+
 ```
 var GodOf_User = NewGod(F_User, "数据库节点名", Table_mod_int("kk_user_%d", 256))
 
-stmts := GodOf_User.Sharding([]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, []{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"})
+GodOf_User.Sharding(1, "A").On(
+    E_in("id", 1),
+    E_in("name", "A"),
+).Multi("simple")
+}
+```
+
+#### 多分表决策数据
+
+```
+var GodOf_User = NewGod(F_User, "数据库节点名", Table_mod_int("kk_user_%d", 256))
+
+stmts := GodOf_User.Shardings([]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, []{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"})
 for _, stmt := range stmts {
     stmt.On(
         E_in("id", stmt.ShardingData[0]),

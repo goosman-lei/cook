@@ -362,6 +362,10 @@ func (g *God) parse_args_for_insert(args ...interface{}) *insert_clause {
 			for _, arg := range v {
 				cols_hints[arg] = true
 			}
+		} else {
+			for col, _ := range g.Model.Mapping_with_column {
+				cols_hints[col] = true
+			}
 		}
 
 		for idx, arg := range args {
