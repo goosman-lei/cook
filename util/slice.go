@@ -1,6 +1,7 @@
 package util
 
 import (
+	"reflect"
 	"strconv"
 )
 
@@ -10,4 +11,140 @@ func Slice_int_to_string(s []int) []string {
 		sr[i] = strconv.FormatInt(int64(v), 10)
 	}
 	return sr
+}
+
+func Slice_pick(s interface{}, field string, fn func(v reflect.Value)) {
+	r_type_s := reflect.TypeOf(s)
+	r_value_s := reflect.ValueOf(s)
+	if r_type_s.Kind() == reflect.Ptr {
+		r_type_s = r_type_s.Elem()
+		r_value_s = r_value_s.Elem()
+	}
+	if r_type_s.Kind() != reflect.Slice {
+		return
+	}
+
+	r_type_e := r_type_s.Elem()
+	if r_type_e.Kind() == reflect.Ptr || r_type_e.Kind() == reflect.Interface {
+		for i := 0; i < r_value_s.Len(); i++ {
+			fn(r_value_s.Index(i).Elem().FieldByName(field))
+		}
+	} else {
+		for i := 0; i < r_value_s.Len(); i++ {
+			fn(r_value_s.Index(i).FieldByName(field))
+		}
+	}
+
+}
+
+func Slice_pick_int(s interface{}, field string) []int {
+	r_ints := []int{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_ints = append(r_ints, VAs_int(v))
+	})
+	return r_ints
+}
+
+func Slice_pick_int8(s interface{}, field string) []int8 {
+	r_int8s := []int8{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_int8s = append(r_int8s, VAs_int8(v))
+	})
+	return r_int8s
+}
+
+func Slice_pick_int16(s interface{}, field string) []int16 {
+	r_int16s := []int16{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_int16s = append(r_int16s, VAs_int16(v))
+	})
+	return r_int16s
+}
+
+func Slice_pick_int32(s interface{}, field string) []int32 {
+	r_int32s := []int32{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_int32s = append(r_int32s, VAs_int32(v))
+	})
+	return r_int32s
+}
+
+func Slice_pick_int64(s interface{}, field string) []int64 {
+	r_int64s := []int64{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_int64s = append(r_int64s, VAs_int64(v))
+	})
+	return r_int64s
+}
+
+func Slice_pick_uint(s interface{}, field string) []uint {
+	r_uints := []uint{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_uints = append(r_uints, VAs_uint(v))
+	})
+	return r_uints
+}
+
+func Slice_pick_uint8(s interface{}, field string) []uint8 {
+	r_uint8s := []uint8{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_uint8s = append(r_uint8s, VAs_uint8(v))
+	})
+	return r_uint8s
+}
+
+func Slice_pick_uint16(s interface{}, field string) []uint16 {
+	r_uint16s := []uint16{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_uint16s = append(r_uint16s, VAs_uint16(v))
+	})
+	return r_uint16s
+}
+
+func Slice_pick_uint32(s interface{}, field string) []uint32 {
+	r_uint32s := []uint32{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_uint32s = append(r_uint32s, VAs_uint32(v))
+	})
+	return r_uint32s
+}
+
+func Slice_pick_uint64(s interface{}, field string) []uint64 {
+	r_uint64s := []uint64{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_uint64s = append(r_uint64s, VAs_uint64(v))
+	})
+	return r_uint64s
+}
+
+func Slice_pick_bool(s interface{}, field string) []bool {
+	r_bools := []bool{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_bools = append(r_bools, VAs_bool(v))
+	})
+	return r_bools
+}
+
+func Slice_pick_float32(s interface{}, field string) []float32 {
+	r_float32s := []float32{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_float32s = append(r_float32s, VAs_float32(v))
+	})
+	return r_float32s
+}
+
+func Slice_pick_float64(s interface{}, field string) []float64 {
+	r_float64s := []float64{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_float64s = append(r_float64s, VAs_float64(v))
+	})
+	return r_float64s
+}
+
+func Slice_pick_string(s interface{}, field string) []string {
+	r_strings := []string{}
+	Slice_pick(s, field, func(v reflect.Value) {
+		r_strings = append(r_strings, VAs_string(v))
+	})
+	return r_strings
 }
