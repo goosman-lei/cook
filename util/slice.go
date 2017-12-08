@@ -24,17 +24,16 @@ func Slice_pick(s interface{}, field string, fn func(v reflect.Value)) {
 		return
 	}
 
-	r_type_e := r_type_s.Elem()
-	if r_type_e.Kind() == reflect.Ptr || r_type_e.Kind() == reflect.Interface {
-		for i := 0; i < r_value_s.Len(); i++ {
-			fn(r_value_s.Index(i).Elem().FieldByName(field))
+	for i := 0; i < r_value_s.Len(); i++ {
+		r_value_e := r_value_s.Index(i)
+		if r_value_e.Kind() == reflect.Interface {
+			r_value_e = r_value_e.Elem()
 		}
-	} else {
-		for i := 0; i < r_value_s.Len(); i++ {
-			fn(r_value_s.Index(i).FieldByName(field))
+		if r_value_e.Kind() == reflect.Ptr {
+			r_value_e = r_value_e.Elem()
 		}
+		fn(r_value_e.FieldByName(field))
 	}
-
 }
 
 func Slice_pick_int(s interface{}, field string) []int {
