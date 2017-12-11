@@ -2,6 +2,7 @@ package orm
 
 import (
 	"database/sql"
+	cook_log "gitlab.niceprivate.com/golang/cook/log"
 	"reflect"
 )
 
