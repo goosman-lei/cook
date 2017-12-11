@@ -239,11 +239,17 @@ func (s *Statement) Limit(args ...int) *Statement {
 
 func (s *Statement) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	s.God.LastStatement = s
+	if InDebug {
+		cook_log.Debugf("Query: %s. Args: %#v", query, args)
+	}
 	return s.God.query(query, args...)
 }
 
 func (s *Statement) Exec(query string, args ...interface{}) (sql.Result, error) {
 	s.God.LastStatement = s
+	if InDebug {
+		cook_log.Debugf("Query: %s. Args: %#v", query, args)
+	}
 	return s.God.exec(query, args...)
 }
 
