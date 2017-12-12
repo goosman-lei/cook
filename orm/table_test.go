@@ -51,7 +51,7 @@ func Test_Table_Sharding(t *testing.T) {
 	t.Skip()
 	var God = NewGod(F_User_sharding_test, "not-exists-node", Table_mod_int("kk_user_%d", 6))
 
-	stmts := God.Sharding([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20})
+	stmts := God.Shardings([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20})
 	stmts[0].On(E_in("id", stmts[0].ShardingData[0])).One()
 	if stmts[0].SQL != "SELECT * FROM kk_user_3 WHERE id IN(?, ?, ?) LIMIT ?" || len(stmts[0].Args) != 4 || stmts[0].Args[0] != 3 {
 		t.Logf("error at sharding:\n\tSQL: %s\n\tArgs: %#v\n", stmts[0].SQL, stmts[0].Args)

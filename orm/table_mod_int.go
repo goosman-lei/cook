@@ -2,6 +2,7 @@ package orm
 
 import (
 	"fmt"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 )
 
 type table_mod_int struct {
@@ -20,30 +21,7 @@ func (t *table_mod_int) Name(cols ...interface{}) string {
 	if len(cols) < 1 {
 		return t.Format
 	} else {
-		switch v := cols[0].(type) {
-		case int:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case int64:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case int32:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case int16:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case int8:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case uint:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case uint64:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case uint32:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case uint16:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		case uint8:
-			return fmt.Sprintf(t.Format, int(v)%t.ShardingCount)
-		default:
-			return t.Format
-		}
+		return fmt.Sprintf(t.Format, cook_util.As_int(cols[0])%t.ShardingCount)
 	}
 }
 
