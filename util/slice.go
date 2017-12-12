@@ -5,6 +5,14 @@ import (
 	"strconv"
 )
 
+func Slice_seqs(start, stop, step int) []int {
+	s := []int{}
+	for i := start; i <= stop; i += step {
+		s = append(s, i)
+	}
+	return s
+}
+
 func Slice_int_to_string(s []int) []string {
 	sr := make([]string, len(s))
 	for i, v := range s {
