@@ -1,6 +1,7 @@
 package connector
 
 import (
+	"errors"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	cook_log "gitlab.niceprivate.com/golang/cook/log"
@@ -10,7 +11,7 @@ import (
 )
 
 type RedisConnWrapper struct {
-	redis.Conn
+	Conn redis.Conn
 }
 
 type RedisConf struct {
@@ -27,7 +28,10 @@ type RedisConf struct {
 	WriteTimeout   time.Duration
 }
 
-var redisConnMapping *cook_util.CMap = cook_util.NewCMap()
+var (
+	redisConnMapping       *cook_util.CMap = cook_util.NewCMap()
+	Err_invalid_connection                 = errors.New("Invalid connection")
+)
 
 func setup_one_redis(sn string, config RedisConf) {
 	redisConnMapping.Set(sn, &redis.Pool{
@@ -73,20 +77,27 @@ func SetupRedis(configs map[string]RedisConf) error {
 
 func GetRedis(sn string) (*RedisConnWrapper, error) {
 	if conn, exists := redisConnMapping.Get(sn); exists {
-		return &RedisConnWrapper{conn.(*redis.Pool).Get()}, nil
+		return &RedisConnWrapper{Conn: conn.(*redis.Pool).Get()}, nil
 	}
 	cook_log.Warnf("get redis conn[%s], but not ready", sn)
 	return nil, fmt.Errorf("have no mysql cluster: %s", sn)
 }
 
 func MustGetRedis(sn string) *RedisConnWrapper {
-	conn, err := GetRedis(sn)
-	if err != nil {
-		panic(err)
+	if conn, exists := redisConnMapping.Get(sn); exists {
+		return &RedisConnWrapper{Conn: conn.(*redis.Pool).Get()}
+	} else {
+		return &RedisConnWrapper{}
 	}
-	return conn
 }
 
+func (c *RedisConnWrapper) Do(command string, argv ...interface{}) (interface{}, error) {
+	if c.Conn == nil {
+		cook_log.Warnf("invlaid connection. call [%s %v]", command, argv)
+		return nil, Err_invalid_connection
+	}
+	return c.Conn.Do(command, argv...)
+}
 func (c *RedisConnWrapper) DoBool(command string, argv ...interface{}) (bool, error) {
 	return redis.Bool(c.Do(command, argv...))
 }
