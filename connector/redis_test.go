@@ -52,6 +52,9 @@ func init() {
 }
 
 func Test_GetRedis(t *testing.T) {
+	if skipRedis {
+		t.Skipf("test redis server is not reachable")
+	}
 	c1 := MustGetRedis("cluster1")
 	c2 := MustGetRedis("cluster2")
 

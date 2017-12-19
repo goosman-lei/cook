@@ -91,6 +91,12 @@ func MustGetRedis(sn string) *RedisConnWrapper {
 	}
 }
 
+func (c *RedisConnWrapper) Close() error {
+	if c.Conn != nil {
+		return c.Conn.Close()
+	}
+	return nil
+}
 func (c *RedisConnWrapper) Do(command string, argv ...interface{}) (interface{}, error) {
 	if c.Conn == nil {
 		cook_log.Warnf("invlaid connection. call [%s %v]", command, argv)
