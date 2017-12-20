@@ -1,6 +1,7 @@
 package json
 
 import (
+	"bytes"
 	"encoding/json"
 	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"io"
@@ -8,6 +9,55 @@ import (
 	"strings"
 )
 
+func Marshal_obj(v interface{}) (string, error) {
+	r_v := reflect.ValueOf(v)
+	if r_v.Kind() != reflect.Ptr || r_v.Elem().Kind() != reflect.Struct {
+		return "", &json.InvalidUnmarshalError{Type: r_v.Type()}
+	}
+	r_v = r_v.Elem()
+
+	buf := new(bytes.Buffer)
+	buf.WriteRune('{')
+	is_first := true
+	rt_v := r_v.Type()
+	for i := 0; i < rt_v.NumField(); i++ {
+		rt_f := rt_v.Field(i)
+		tag, ok := rt_f.Tag.Lookup("json")
+		if tag == "-" || (strings.HasSuffix(tag, ",omitempty") && cook_util.VIs_empty(r_v.Field(i))) {
+			continue
+		}
+		if is_first {
+			is_first = false
+		} else {
+			buf.WriteRune(',')
+		}
+		if !ok || len(tag) < 1 || tag == ",omitempty" {
+			buf.WriteRune('"')
+			buf.WriteString(cook_util.Hump_to_underline(rt_f.Name))
+			buf.WriteRune('"')
+			buf.WriteRune(':')
+		} else if tag == "-," {
+			buf.WriteString("\"-\":")
+		} else if strings.HasSuffix(tag, ",omitempty") {
+			buf.WriteRune('"')
+			buf.WriteString(strings.TrimRight(tag, ",omitempty"))
+			buf.WriteRune('"')
+			buf.WriteRune(':')
+		} else {
+			buf.WriteRune('"')
+			buf.WriteString(tag)
+			buf.WriteRune('"')
+			buf.WriteRune(':')
+		}
+		if j, err := json.Marshal(r_v.Field(i).Interface()); err == nil {
+			buf.Write(j)
+		} else {
+			buf.WriteString("null")
+		}
+	}
+	buf.WriteRune('}')
+	return buf.String(), nil
+}
 func Unmarshal_into_obj(j string, v interface{}) error {
 	r_v := reflect.ValueOf(v)
 	if r_v.Kind() != reflect.Ptr || r_v.Elem().Kind() != reflect.Struct {
@@ -31,7 +81,7 @@ func Unmarshal_into_obj(j string, v interface{}) error {
 		} else if strings.HasSuffix(tag, ",omitempty") {
 			mapping[strings.TrimRight(tag, ",omitempty")] = r_v.Field(i)
 		} else {
-			mapping[cook_util.Hump_to_underline(rt_f.Name)] = r_v.Field(i)
+			mapping[tag] = r_v.Field(i)
 		}
 	}
 
