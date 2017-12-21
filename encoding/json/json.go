@@ -49,10 +49,21 @@ func Marshal_obj(v interface{}) (string, error) {
 			buf.WriteRune('"')
 			buf.WriteRune(':')
 		}
-		if j, err := json.Marshal(r_v.Field(i).Interface()); err == nil {
-			buf.Write(j)
-		} else {
-			buf.WriteString("null")
+		switch r_v.Field(i).Kind() {
+		case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64:
+			// In json, there have no 64 bit integer support. It assume that as double when encounter integer over 2^32
+			// so here we convert it to string
+			if j, err := json.Marshal(cook_util.VAs_string(r_v.Field(i))); err == nil {
+				buf.Write(j)
+			} else {
+				buf.WriteString("null")
+			}
+		default:
+			if j, err := json.Marshal(r_v.Field(i).Interface()); err == nil {
+				buf.Write(j)
+			} else {
+				buf.WriteString("null")
+			}
 		}
 	}
 	buf.WriteRune('}')
