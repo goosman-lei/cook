@@ -1,6 +1,7 @@
 package http
 
 import (
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -21,6 +22,14 @@ func TestCase_Get(t *testing.T) {
 
 	if len(body) < 10 {
 		t.Fatalf("content length too small")
+	}
+}
+
+func TestCase_Get_new(t *testing.T) {
+	c := NewClient(ConnTimeout(1 * time.Microsecond))
+	_, _, err := c.Get("http://www.baidu.com")
+	if !cook_util.Err_IsTimeout(err) {
+		t.Fatalf("unexcept error: %s", err)
 	}
 }
 
