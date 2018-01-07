@@ -97,6 +97,7 @@ func Unmarshal_into_obj(j string, v interface{}) error {
 	}
 
 	dec := json.NewDecoder(strings.NewReader(j))
+	dec.UseNumber()
 
 	if t, err := dec.Token(); err == io.EOF {
 		return &json.SyntaxError{Offset: 0}
