@@ -2,8 +2,26 @@ package util
 
 import (
 	"reflect"
+	"sort"
 	"strconv"
 )
+
+func Slice_uniq_string(s sort.StringSlice) []string {
+	t := []string{}
+	if s.Len() < 1 {
+		return t
+	}
+	s.Sort()
+	o := 0
+	t = append(t, s[o])
+	for i := 1; i < s.Len(); i++ {
+		if s[i] != t[o] {
+			t = append(t, s[i])
+			o++
+		}
+	}
+	return t
+}
 
 func Slice_seqs(start, stop, step int) []int {
 	s := []int{}
