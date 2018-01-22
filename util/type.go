@@ -6,6 +6,80 @@ import (
 	"strconv"
 )
 
+func Indirect(v interface{}) reflect.Value {
+	return V_indirect(reflect.ValueOf(v))
+}
+
+func Indirect_zero(v interface{}, wantZero bool) reflect.Value {
+	return V_indirect_zero(reflect.ValueOf(v), wantZero)
+}
+
+func Indirect_stopAt(v interface{}, stopFn func(reflect.Value) bool) reflect.Value {
+	return V_indirect_stopAt(reflect.ValueOf(v), stopFn)
+}
+
+// Copy from GOROOT/src/encoding/json/decode.go: func (d *decodeState) indirect()
+func Indirect_full(v interface{}, stopFn reflect.Value, wantZero bool) reflect.Value {
+	return V_indirect_full(reflect.ValueOf(v), stopFn, wantZero)
+}
+
+func V_indirect(v reflect.Value) reflect.Value {
+	return V_indirect_full(v, reflect.ValueOf(func(reflect.Value) bool {
+		return false
+	}), false)
+}
+
+func V_indirect_zero(v reflect.Value, wantZero bool) reflect.Value {
+	return V_indirect_full(v, reflect.ValueOf(func(reflect.Value) bool {
+		return false
+	}), wantZero)
+}
+
+func V_indirect_stopAt(v reflect.Value, stopFn func(reflect.Value) bool) reflect.Value {
+	return V_indirect_full(v, reflect.ValueOf(stopFn), false)
+}
+
+// Copy from GOROOT/src/encoding/json/decode.go: func (d *decodeState) indirect()
+func V_indirect_full(v reflect.Value, stopFn reflect.Value, wantZero bool) (rv reflect.Value) {
+	defer func() {
+		if e := recover(); e != nil {
+			rv = reflect.ValueOf(nil)
+		}
+	}()
+	// make v CanAddr()
+	if v.Kind() != reflect.Ptr && v.Type().Name() != "" && v.CanAddr() {
+		v = v.Addr()
+	}
+	for {
+		if v.Kind() == reflect.Interface && !v.IsNil() {
+			e := v.Elem()
+			if e.Kind() == reflect.Ptr && !e.IsNil() && (!wantZero || e.Elem().Kind() == reflect.Ptr) {
+				v = e
+			}
+		}
+
+		if v.Kind() != reflect.Ptr {
+			break
+		}
+
+		if v.Elem().Kind() != reflect.Ptr && wantZero && v.CanSet() {
+			break
+		}
+		if v.IsNil() {
+			v.Set(reflect.New(v.Type().Elem()))
+		}
+		// stopFn decide This is valid Type
+		if stopFn.Kind() == reflect.Func {
+			out := stopFn.Call([]reflect.Value{reflect.ValueOf(v)})
+			if len(out) > 0 && VAs_bool(out[0]) {
+				return v
+			}
+		}
+		v = v.Elem()
+	}
+	return v
+}
+
 func Is_empty(v interface{}) bool {
 	return VIs_empty(reflect.ValueOf(v))
 }
