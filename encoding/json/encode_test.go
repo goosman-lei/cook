@@ -16,6 +16,11 @@ import (
 	"unicode"
 )
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 type Optionals struct {
 	Sr string `json:"sr"`
 	So string `json:"so,omitempty"`

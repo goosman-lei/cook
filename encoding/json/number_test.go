@@ -9,6 +9,11 @@ import (
 	"testing"
 )
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 func TestNumberIsValid(t *testing.T) {
 	// From: http://stackoverflow.com/a/13340826
 	var jsonNumberRegexp = regexp.MustCompile(`^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$`)

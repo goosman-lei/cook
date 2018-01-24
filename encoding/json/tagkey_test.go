@@ -8,6 +8,11 @@ import (
 	"testing"
 )
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 type basicLatin2xTag struct {
 	V string `json:"$%-/"`
 }

@@ -8,6 +8,11 @@ import (
 	"testing"
 )
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 func TestTagParsing(t *testing.T) {
 	name, opts := parseTag("field,foobar,foo")
 	if name != "field" {

@@ -19,6 +19,11 @@ import (
 	"testing"
 )
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 type codeResponse struct {
 	Tree     *codeNode `json:"tree"`
 	Username string    `json:"username"`

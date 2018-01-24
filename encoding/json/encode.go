@@ -15,6 +15,7 @@ import (
 	"encoding"
 	"encoding/base64"
 	"fmt"
+	cook_util "gitlab.niceprivate.com/golang/cook/util"
 	"math"
 	"reflect"
 	"runtime"
@@ -26,6 +27,24 @@ import (
 	"unicode"
 	"unicode/utf8"
 )
+
+var (
+	switch_of_auto_dequote      bool = true
+	switch_of_hump_to_underline bool = true
+)
+
+func AutoDequoteOff() {
+	switch_of_auto_dequote = false
+}
+func AutoDequoteOn() {
+	switch_of_auto_dequote = true
+}
+func HumpToUnderlineOff() {
+	switch_of_hump_to_underline = false
+}
+func HumpToUnderlineOn() {
+	switch_of_hump_to_underline = true
+}
 
 // Marshal returns the JSON encoding of v.
 //
@@ -156,6 +175,10 @@ import (
 // handle them. Passing cyclic structures to Marshal will result in
 // an infinite recursion.
 //
+func Marshal_string(v interface{}) (string, error) {
+	d, e := Marshal(v)
+	return string(d), e
+}
 func Marshal(v interface{}) ([]byte, error) {
 	e := &encodeState{}
 	err := e.marshal(v, encOpts{escapeHTML: true})
@@ -1139,7 +1162,11 @@ func typeFields(t reflect.Type) []field {
 				if name != "" || !sf.Anonymous || ft.Kind() != reflect.Struct {
 					tagged := name != ""
 					if name == "" {
-						name = sf.Name
+						if switch_of_hump_to_underline {
+							name = cook_util.Hump_to_underline(sf.Name)
+						} else {
+							name = sf.Name
+						}
 					}
 					fields = append(fields, fillField(field{
 						name:      name,

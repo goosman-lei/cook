@@ -5,8 +5,8 @@
 package json_test
 
 import (
-	"encoding/json"
 	"fmt"
+	"gitlab.niceprivate.com/golang/cook/encoding/json"
 	"log"
 	"strings"
 )
@@ -18,6 +18,11 @@ const (
 	Gopher
 	Zebra
 )
+
+func init() {
+	json.AutoDequoteOff()
+	json.HumpToUnderlineOff()
+}
 
 func (a *Animal) UnmarshalJSON(b []byte) error {
 	var s string

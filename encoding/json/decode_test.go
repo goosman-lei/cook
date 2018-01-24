@@ -41,6 +41,11 @@ type VOuter struct {
 	V V
 }
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 // ifaceNumAsFloat64/ifaceNumAsNumber are used to test unmarshaling with and
 // without UseNumber
 var ifaceNumAsFloat64 = map[string]interface{}{

@@ -17,6 +17,11 @@ import (
 	"testing"
 )
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 // Test values for the stream test.
 // One of each JSON kind.
 var streamTest = []interface{}{

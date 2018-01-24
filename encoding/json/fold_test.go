@@ -11,6 +11,11 @@ import (
 	"unicode/utf8"
 )
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 var foldTests = []struct {
 	fn   func(s, t []byte) bool
 	s, t string

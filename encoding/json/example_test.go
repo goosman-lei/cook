@@ -6,14 +6,18 @@ package json_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"gitlab.niceprivate.com/golang/cook/encoding/json"
 	"io"
 	"log"
 	"os"
 	"strings"
 )
 
+func init() {
+	json.AutoDequoteOff()
+	json.HumpToUnderlineOff()
+}
 func ExampleMarshal() {
 	type ColorGroup struct {
 		ID     int

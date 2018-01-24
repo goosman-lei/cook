@@ -12,6 +12,11 @@ import (
 	"testing"
 )
 
+func init() {
+	AutoDequoteOff()
+	HumpToUnderlineOff()
+}
+
 // Tests of simple examples.
 
 type example struct {

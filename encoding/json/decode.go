@@ -90,6 +90,9 @@ import (
 // Instead, they are replaced by the Unicode replacement
 // character U+FFFD.
 //
+func Unmarshal_string(s string, v interface{}) error {
+	return Unmarshal([]byte(s), v)
+}
 func Unmarshal(data []byte, v interface{}) error {
 	// Check for well-formedness.
 	// Avoids filling out half a data structure
@@ -673,6 +676,7 @@ func (d *decodeState) object(v reflect.Value) {
 		// Figure out field corresponding to key.
 		var subv reflect.Value
 		destring := false // whether the value is wrapped in a string to be decoded first
+		auto_dequote := false
 
 		if v.Kind() == reflect.Map {
 			elemType := v.Type().Elem()
@@ -697,6 +701,13 @@ func (d *decodeState) object(v reflect.Value) {
 			}
 			if f != nil {
 				subv = v
+				switch f.typ.Kind() {
+				case reflect.Bool,
+					reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+					reflect.Float32, reflect.Float64:
+					auto_dequote = true
+				}
 				destring = f.quoted
 				for _, i := range f.index {
 					if subv.Kind() == reflect.Ptr {
@@ -720,7 +731,21 @@ func (d *decodeState) object(v reflect.Value) {
 			d.error(errPhase)
 		}
 
-		if destring {
+		if switch_of_auto_dequote && auto_dequote {
+			for off := d.off; off < len(d.data); off++ {
+				c := d.data[off]
+				if c <= ' ' && isSpace(c) {
+					continue
+				} else if c == '"' { // need auto_dequote
+					break
+				} else {
+					auto_dequote = false // don't need auto_dequote
+					break
+				}
+			}
+		}
+
+		if destring || (switch_of_auto_dequote && auto_dequote) {
 			switch qv := d.valueQuoted().(type) {
 			case nil:
 				d.literalStore(nullLiteral, subv, false)
