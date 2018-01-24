@@ -175,6 +175,10 @@ func HumpToUnderlineOn() {
 // handle them. Passing cyclic structures to Marshal will result in
 // an infinite recursion.
 //
+// 填坑
+func Marshal_obj(v interface{}) (string, error) {
+	return Marshal_string(v)
+}
 func Marshal_string(v interface{}) (string, error) {
 	d, e := Marshal(v)
 	return string(d), e

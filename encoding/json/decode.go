@@ -90,6 +90,10 @@ import (
 // Instead, they are replaced by the Unicode replacement
 // character U+FFFD.
 //
+// 填坑
+func Unmarshal_into_obj(s string, v interface{}) error {
+	return Unmarshal_string(s, v)
+}
 func Unmarshal_string(s string, v interface{}) error {
 	return Unmarshal([]byte(s), v)
 }
