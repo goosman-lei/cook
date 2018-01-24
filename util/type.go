@@ -265,9 +265,9 @@ func VAs_int64(v reflect.Value) int64 {
 		return int64(v.Float())
 	case reflect.Bool:
 		if v.Bool() {
-			return 0
-		} else {
 			return 1
+		} else {
+			return 0
 		}
 	case reflect.String:
 		if iv, err := strconv.ParseInt(v.String(), 10, 64); err != nil {
@@ -306,9 +306,9 @@ func VAs_uint64(v reflect.Value) uint64 {
 		return uint64(v.Float())
 	case reflect.Bool:
 		if v.Bool() {
-			return 0
-		} else {
 			return 1
+		} else {
+			return 0
 		}
 	case reflect.String:
 		if iv, err := strconv.ParseUint(v.String(), 10, 64); err != nil {
@@ -335,9 +335,9 @@ func VAs_float64(v reflect.Value) float64 {
 		return v.Float()
 	case reflect.Bool:
 		if v.Bool() {
-			return 0.0
-		} else {
 			return 1.0
+		} else {
+			return 0.0
 		}
 	case reflect.String:
 		if fv, err := strconv.ParseFloat(v.String(), 64); err != nil {
