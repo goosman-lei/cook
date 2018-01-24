@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -38,4 +39,8 @@ func Hump_to_underline(s string) string {
 		}
 	}
 	return b.String()
+}
+
+func Equal_hump_to_underline(s1, s2 string) bool {
+	return strings.EqualFold(Hump_to_underline(s1), Hump_to_underline(s2))
 }
