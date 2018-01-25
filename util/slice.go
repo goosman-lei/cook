@@ -175,6 +175,9 @@ func Slice_pick_string(s interface{}, field string) []string {
 }
 
 func Slice_string_remove(subject []string, targets ...string) []string {
+	if len(targets) < 1 {
+		return subject
+	}
 	m := make(map[string]bool, len(targets))
 	for _, t := range targets {
 		m[t] = true
