@@ -177,7 +177,7 @@ func Slice_pick_string(s interface{}, field string) []string {
 func Slice_string_fill_bool(s []string, v bool) map[string]bool {
 	m := make(map[string]bool, len(s))
 	for _, t := range s {
-		m[t] = true
+		m[t] = v
 	}
 	return m
 }
