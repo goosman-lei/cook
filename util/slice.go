@@ -174,14 +174,19 @@ func Slice_pick_string(s interface{}, field string) []string {
 	return r_strings
 }
 
+func Slice_string_fill_bool(s []string, v bool) map[string]bool {
+	m := make(map[string]bool, len(s))
+	for _, t := range s {
+		m[t] = true
+	}
+	return m
+}
+
 func Slice_string_remove(subject []string, targets ...string) []string {
 	if len(targets) < 1 {
 		return subject
 	}
-	m := make(map[string]bool, len(targets))
-	for _, t := range targets {
-		m[t] = true
-	}
+	m := Slice_string_fill_bool(targets, true)
 	return Slice_string_filter(subject, func(s string) bool {
 		_, ok := m[s]
 		return ok
