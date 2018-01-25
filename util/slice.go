@@ -173,3 +173,24 @@ func Slice_pick_string(s interface{}, field string) []string {
 	})
 	return r_strings
 }
+
+func Slice_string_remove(subject []string, targets ...string) []string {
+	m := make(map[string]bool, len(targets))
+	for _, t := range targets {
+		m[t] = true
+	}
+	return Slice_string_filter(subject, func(s string) bool {
+		_, ok := m[s]
+		return ok
+	})
+}
+
+func Slice_string_filter(subject []string, fn func(string) bool) []string {
+	var newSubject = []string{}
+	for _, s := range subject {
+		if !fn(s) {
+			newSubject = append(newSubject, s)
+		}
+	}
+	return newSubject
+}

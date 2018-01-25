@@ -67,3 +67,21 @@ func TestCase_Slice_uniq_string(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestCase_Slice_string_remove(t *testing.T) {
+	s := []string{"1", "22", "333", "4444", "55555"}
+	sr := Slice_string_remove(s, "22")
+	if len(sr) == len(s) || sr[0] != "1" || sr[1] != "333" || sr[2] != "4444" || sr[3] != "55555" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555"}
+	sr = Slice_string_remove(s, "222")
+	if len(sr) != len(s) || sr[0] != "1" || sr[1] != "22" || sr[2] != "333" || sr[3] != "4444" || sr[4] != "55555" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555"}
+	sr = Slice_string_remove(s, "22", "333")
+	if len(sr) == len(s) || sr[0] != "1" || sr[1] != "4444" || sr[2] != "55555" {
+		t.Fatal("slice_int_to_string failed")
+	}
+}
