@@ -85,3 +85,19 @@ func TestCase_Slice_string_remove(t *testing.T) {
 		t.Fatal("slice_int_to_string failed")
 	}
 }
+
+func TestCase_Slice_string_merge(t *testing.T) {
+	s := []string{"1", "22", "333", "4444", "55555"}
+	s1 := []string{"6", "77", "888", "9999", "00000"}
+	sr := Slice_string_merge(s, s1)
+	if len(sr) != len(s)+len(s1) || sr[0] != "1" || sr[9] != "00000" || sr[4] != "55555" || sr[5] != "6" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555"}
+	s1 = []string{"4444", "55555", "888", "9999", "00000"}
+	s2 := []string{"4444", "55555", "AAAA", "BBBB", "CCCC"}
+	sr = Slice_string_merge(s, s1, s2)
+	if len(sr) == len(s)+len(s1) || sr[0] != "1" || sr[3] != "4444" || sr[4] != "55555" || sr[5] != "888" || sr[10] != "CCCC" {
+		t.Fatal("slice_int_to_string failed")
+	}
+}

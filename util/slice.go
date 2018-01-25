@@ -197,3 +197,21 @@ func Slice_string_filter(subject []string, fn func(string) bool) []string {
 	}
 	return newSubject
 }
+
+func Slice_string_merge(targets ...[]string) []string {
+	if len(targets) < 1 {
+		return []string{}
+	}
+	var filter map[string]bool = make(map[string]bool)
+	var subject []string
+	for _, one := range targets {
+		for _, t := range one {
+			if _, ok := filter[t]; ok {
+				continue
+			}
+			filter[t] = true
+			subject = append(subject, t)
+		}
+	}
+	return subject
+}
