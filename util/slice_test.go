@@ -85,3 +85,41 @@ func TestCase_Slice_string_remove(t *testing.T) {
 		t.Fatal("slice_int_to_string failed")
 	}
 }
+
+func TestCase_Slice_string_remove_n(t *testing.T) {
+	s := []string{"1", "22", "333", "4444", "55555"}
+	sr := Slice_string_remove_n(s, 1, "22")
+	if len(sr) == len(s) || sr[0] != "1" || sr[1] != "333" || sr[2] != "4444" || sr[3] != "55555" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555"}
+	sr = Slice_string_remove_n(s, 2, "22")
+	if len(sr) == len(s) || sr[0] != "1" || sr[1] != "333" || sr[2] != "4444" || sr[3] != "55555" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555"}
+	sr = Slice_string_remove_n(s, 0, "22")
+	if len(sr) != len(s) || sr[0] != "1" || sr[1] != "22" || sr[2] != "333" || sr[3] != "4444" || sr[4] != "55555" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555"}
+	sr = Slice_string_remove_n(s, 1, "55555")
+	if len(sr) != 4 || sr[0] != "1" || sr[1] != "22" || sr[2] != "333" || sr[3] != "4444" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555", "22"}
+	sr = Slice_string_remove_n(s, 1, "22")
+	if len(sr) == len(s) || sr[0] != "1" || sr[1] != "333" || sr[2] != "4444" || sr[3] != "55555" || sr[4] != "22" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555", "22"}
+	sr = Slice_string_remove_n(s, 2, "22")
+	if len(sr) != 4 || sr[0] != "1" || sr[1] != "333" || sr[2] != "4444" || sr[3] != "55555" {
+		t.Fatal("slice_int_to_string failed")
+	}
+	s = []string{"1", "22", "333", "4444", "55555", "22"}
+	sr = Slice_string_remove_n(s, 2, "222")
+	if len(sr) != len(s) || sr[0] != "1" || sr[1] != "22" || sr[2] != "333" || sr[3] != "4444" || sr[4] != "55555" || sr[5] != "22" {
+		t.Fatal("slice_int_to_string failed")
+	}
+}
