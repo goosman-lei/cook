@@ -24,7 +24,7 @@ var mysqlConnMapping *cook_util.CMap = cook_util.NewCMap()
 
 func SetupMysql(configs map[string]MysqlConf) error {
 	for sn, config := range configs {
-		db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8",
+		db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4",
 			config.Username, config.Password, config.Addr, config.Database))
 		if err != nil {
 			cook_log.Fatalf("mysql cluster [%s: %s@%s/%s] setup failed: %s",
